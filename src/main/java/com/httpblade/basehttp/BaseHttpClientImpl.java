@@ -4,6 +4,8 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.base.*;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
+import com.httpblade.common.Utils;
 import com.httpblade.common.task.AsyncTaskExecutor;
 import com.httpblade.common.task.Task;
 
@@ -26,7 +28,8 @@ public class BaseHttpClientImpl implements HttpClient {
     private AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
 
     public BaseHttpClientImpl() {
-
+        globalHeaders = new Headers();
+        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     BaseHttpClientImpl(BaseHttpClientBuilderImpl clientBuilder) {
@@ -36,7 +39,13 @@ public class BaseHttpClientImpl implements HttpClient {
         this.maxRedirectCount = clientBuilder.maxRedirectCount;
         this.cookieHome = clientBuilder.cookieHome;
         this.globalHeaders = clientBuilder.globalHeaders;
-        this.proxy = clientBuilder.proxy;
+        if (clientBuilder.proxy != null) {
+            this.proxy = Utils.createProxy(clientBuilder.proxy);
+            if (clientBuilder.proxy.hasAuth()) {
+                globalHeaders.set(HttpHeader.PROXY_AUTHORIZATION,
+                    Utils.basicAuthString(clientBuilder.proxy.getUsername(), clientBuilder.proxy.getPassword()));
+            }
+        }
         this.hostnameVerifier = clientBuilder.hostnameVerifier;
         this.sslSocketFactory = clientBuilder.sslSocketFactory;
     }

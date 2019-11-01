@@ -6,6 +6,7 @@ import com.httpblade.base.HttpClient;
 import com.httpblade.base.Request;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -20,7 +21,7 @@ public class OkHttpClientImpl implements HttpClient {
     private int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
     private Headers globalHeaders;
 
-    OkHttpClientImpl() {
+    public OkHttpClientImpl() {
         client = new OkHttpClientBuilderImpl()
             .connectTimeout(Defaults.CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
             .readTimeout(Defaults.READ_TIMEOUT, TimeUnit.MILLISECONDS)
@@ -28,6 +29,8 @@ public class OkHttpClientImpl implements HttpClient {
             .maxRedirectCount(maxRedirectCount)
             .builder
             .build();
+        globalHeaders = new Headers();
+        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     OkHttpClientImpl(OkHttpClientBuilderImpl clientBuilder) {

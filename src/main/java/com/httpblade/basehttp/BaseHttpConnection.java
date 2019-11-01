@@ -4,7 +4,10 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
-import com.httpblade.common.*;
+import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
+import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Utils;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -109,10 +112,10 @@ class BaseHttpConnection {
 
     Response response() throws IOException {
         if (this.conn != null) {
-            if(this.maxRedirectCount < 1) {
+            if (this.maxRedirectCount < 1) {
                 return new BaseHttpResponseImpl(this);
             }
-            if(this.conn.getInstanceFollowRedirects()) {
+            if (this.conn.getInstanceFollowRedirects()) {
 
             }
         }

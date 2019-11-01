@@ -3,11 +3,10 @@ package com.httpblade.common;
 import com.httpblade.HttpBladeException;
 
 import java.io.*;
-import java.net.FileNameMap;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public final class Utils {
 
@@ -216,6 +215,20 @@ public final class Utils {
                 }
             }
         }
+    }
+
+    public static java.net.Proxy createProxy(Proxy proxy) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(proxy.getHost());
+            return new java.net.Proxy(proxy.getType(), new InetSocketAddress(inetAddress, proxy.getPort()));
+        } catch (UnknownHostException e) {
+            throw new HttpBladeException(e);
+        }
+    }
+
+    public static String basicAuthString(String username, String password) {
+        String usernameAndPassword = username + ":" + password;
+        return "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
     }
 
 }

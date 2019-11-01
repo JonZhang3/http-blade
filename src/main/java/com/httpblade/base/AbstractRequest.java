@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -188,9 +187,7 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
 
     protected void setBasicAuth() {
         if (basicUsername != null) {
-            final String data = basicUsername.concat(":").concat(basicPassword);
-            setHeader(HttpHeader.AUTHORIZATION,
-                "Basic " + Base64.getEncoder().encodeToString(data.getBytes(this.charset)));
+            setHeader(HttpHeader.AUTHORIZATION, Utils.basicAuthString(basicUsername, basicPassword));
         }
     }
 

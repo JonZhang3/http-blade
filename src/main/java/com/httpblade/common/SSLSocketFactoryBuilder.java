@@ -8,16 +8,24 @@ import java.util.Arrays;
 
 public final class SSLSocketFactoryBuilder {
 
-    public static final String SSL = "SSL";
-    public static final String SSLv2 = "SSLv2";
-    public static final String SSLv3 = "SSLv3";
+    /** SSL 协议 v1.0 版本 */
+    public static final String PROTOCOL_SSL = "SSL";
+    /** SSL 协议 v2.0 版本 */
+    public static final String PROTOCOL_SSLv2 = "SSLv2";
+    /** SSL 协议 v3.0 版本 */
+    public static final String PROTOCOL_SSLv3 = "SSLv3";
+    /** TLS 协议 v1.0，即 SSL 协议 v3.1 版本，被广泛使用 */
+    public static final String PROTOCOL_TLS = "TLS";
+    /** TLS 协议 v1.1 版本，即 SSL 协议 v3.2 版本 */
+    public static final String PROTOCOL_TLSv11 = "TLSv1.1";
+    /** TLS 协议 v1.2 版本，即 SSL 协议 v3.3 版本 */
+    public static final String PROTOCOL_TLSv12 = "TLSv1.2";
 
-    public static final String TLS = "TLS";
-    public static final String TLSv1 = "TLSv1";
-    public static final String TLSv11 = "TLSv1.1";
-    public static final String TLSv12 = "TLSv1.2";
+    public static final String KEY_STORE_TYPE_JKS = "JKS";
+    public static final String KEY_STORE_TYPE_PKCS8 = "PKCS8";
+    public static final String KEY_STORE_TYPE_PKCS12 = "PKCS12";
 
-    private String protocol = TLS;
+    private String protocol = PROTOCOL_TLS;
     private KeyManager keyManager;
     private X509TrustManager trustManager;
     private SecureRandom secureRandom = new SecureRandom();
@@ -63,18 +71,21 @@ public final class SSLSocketFactoryBuilder {
     }
 
     public SSLSocketFactory build() {
-        try {
-            SSLContext context = SSLContext.getInstance(protocol);
-            context.init(new KeyManager[]{this.keyManager},
-                new TrustManager[]{this.trustManager}, this.secureRandom);
-            return context.getSocketFactory();
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            throw new HttpBladeException(e);
-        }
+        return buildContext().getSocketFactory();
     }
 
     public X509TrustManager getTrustManager() {
         return trustManager;
+    }
+
+    public SSLContext buildContext() {
+        try {
+            SSLContext context = SSLContext.getInstance(protocol);
+            context.init(new KeyManager[]{ this.keyManager }, new TrustManager[]{ this.trustManager }, this.secureRandom);
+            return context;
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            throw new HttpBladeException(e);
+        }
     }
 
 }

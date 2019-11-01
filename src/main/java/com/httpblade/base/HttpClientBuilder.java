@@ -1,9 +1,9 @@
 package com.httpblade.base;
 
+import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 
 import javax.net.ssl.HostnameVerifier;
-import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -101,6 +101,10 @@ public interface HttpClientBuilder<T extends HttpClientBuilder> {
     T addDefaultHeader(String name, String value);
 
     T proxy(Proxy proxy);
+
+    T proxy(String host, int port);
+
+    T proxy(String host, int port, String username, String password);
 
     HttpClient build();
 

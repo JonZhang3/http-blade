@@ -3,13 +3,10 @@ package com.httpblade.basehttp;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.base.HttpClientBuilder;
-import com.httpblade.common.Defaults;
-import com.httpblade.common.Headers;
-import com.httpblade.common.SSLSocketFactoryBuilder;
+import com.httpblade.common.*;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
-import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClientBuilderImpl> {
@@ -25,7 +22,7 @@ public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClie
     SSLSocketFactory sslSocketFactory;
 
     public BaseHttpClientBuilderImpl() {
-
+        setDefaultHeader(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     @Override
@@ -60,9 +57,6 @@ public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClie
 
     @Override
     public BaseHttpClientBuilderImpl maxRedirectCount(int max) {
-        if(max <= 0) {
-            max = 0;
-        }
         this.maxRedirectCount = max;
         return this;
     }
@@ -96,6 +90,18 @@ public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClie
     @Override
     public BaseHttpClientBuilderImpl proxy(Proxy proxy) {
         this.proxy = proxy;
+        return this;
+    }
+
+    @Override
+    public BaseHttpClientBuilderImpl proxy(String host, int port) {
+        this.proxy = new Proxy(host, port);
+        return this;
+    }
+
+    @Override
+    public BaseHttpClientBuilderImpl proxy(String host, int port, String username, String password) {
+        this.proxy = new Proxy(host, port, username, password);
         return this;
     }
 
