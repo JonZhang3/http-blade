@@ -9,7 +9,7 @@ import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 import org.apache.http.client.config.RequestConfig;
-;
+
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;

@@ -4,7 +4,6 @@ import com.httpblade.common.HttpMethod;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -50,8 +49,6 @@ public interface Request<T extends Request> {
     T connect(String url);
 
     T patch(String url);
-
-    // T pathVariable(Object value);
 
     T charset(Charset charset);
 

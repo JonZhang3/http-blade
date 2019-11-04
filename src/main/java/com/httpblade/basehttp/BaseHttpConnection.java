@@ -4,20 +4,26 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
+import com.httpblade.common.Body;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.HttpStatus;
+import com.httpblade.common.HttpUrl;
 import com.httpblade.common.Utils;
+import com.httpblade.common.form.Form;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -26,6 +32,7 @@ class BaseHttpConnection {
     private static final int DEFAULT_CHUNK_LENGTH = 1024 * 2;
 
     private HttpURLConnection conn;
+    private HttpUrl httpUrl;
     private URL url;
     private HttpMethod method;
     private Proxy proxy;
@@ -36,6 +43,10 @@ class BaseHttpConnection {
     private HostnameVerifier hostnameVerifier;
     private SSLSocketFactory ssf;
     private CookieHome cookieHome;
+    private Form form;
+    private Body body;
+    private Charset charset;
+    private Headers globalHeaders;
 
     BaseHttpConnection setUrl(String url) {
         try {
@@ -43,6 +54,11 @@ class BaseHttpConnection {
         } catch (MalformedURLException e) {
             throw new HttpBladeException(e);
         }
+        return this;
+    }
+
+    BaseHttpConnection setUrl(HttpUrl url) {
+        this.httpUrl = url;
         return this;
     }
 
@@ -96,10 +112,24 @@ class BaseHttpConnection {
         return this;
     }
 
-    void connect() throws IOException {
-        if (conn != null) {
-            conn.connect();
-        }
+    BaseHttpConnection setForm(Form form) {
+        this.form = form;
+        return this;
+    }
+
+    BaseHttpConnection setBody(Body body) {
+        this.body = body;
+        return this;
+    }
+
+    BaseHttpConnection setCharset(Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    BaseHttpConnection setGlobalHeaders(Headers globalHeaders) {
+        this.globalHeaders = globalHeaders;
+        return this;
     }
 
     HttpURLConnection getConnection() {
@@ -114,16 +144,76 @@ class BaseHttpConnection {
         return this.url;
     }
 
-    Response response() throws IOException {
-        if (this.conn != null) {
-            if (this.maxRedirectCount < 1) {
-                return new BaseHttpResponseImpl(this);
-            }
-            if (this.conn.getInstanceFollowRedirects()) {
-
-            }
+    Response execute() throws IOException {
+        if (!HttpMethod.requiresRequestBody(method)) {
+            form.forEachFields(charset, (index, name, value) -> httpUrl.addQuery(name, value));
         }
-        return null;
+        this.url = httpUrl.toURL();
+        return innerExecute(1);
+    }
+
+    private Response innerExecute(int redirectCount) throws IOException {
+        initConnection();
+        connect();
+        if (maxRedirectCount < 1) {
+            return new BaseHttpResponseImpl(this);
+        }
+        int code = conn.getResponseCode();
+        switch (code) {
+            case HttpStatus.TEMP_REDIRECT:
+            case HttpStatus.PERM_REDIRECT:
+                if (method != HttpMethod.GET && method != HttpMethod.HEAD) {
+                    return null;
+                }
+            case HttpStatus.MULT_CHOICE:
+            case HttpStatus.MOVED_PERM:
+            case HttpStatus.MOVED_TEMP:
+            case HttpStatus.SEE_OTHER:
+                if (redirectCount <= maxRedirectCount) {
+                    return innerExecute(++redirectCount);
+                } else {
+                    return new BaseHttpResponseImpl(this);
+                }
+            default:
+                return new BaseHttpResponseImpl(this);
+        }
+    }
+
+    private void initConnection() throws IOException {
+        if (this.conn != null) {
+            this.conn.disconnect();
+        }
+        conn = openConnection(this.url, this.proxy);
+        conn.setUseCaches(false);
+        conn.setChunkedStreamingMode(DEFAULT_CHUNK_LENGTH);
+        conn.setRequestMethod(method.value());
+        conn.setInstanceFollowRedirects(this.maxRedirectCount >= 1);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setUseCaches(false);
+        conn.setConnectTimeout(connectTimeout);
+        conn.setReadTimeout(readTimeout);
+        configHttps(conn, this.hostnameVerifier, this.ssf);
+        addHeaders(conn, globalHeaders, headers);
+        addCookie(conn, this.url, this.cookieHome);
+    }
+
+    private void connect() throws IOException {
+        if (conn == null) {
+            throw new NullPointerException("the http connection is null");
+        }
+        String contentType = conn.getRequestProperty(HttpHeader.CONTENT_TYPE);
+        if (HttpMethod.requiresRequestBody(method)) {
+            OutputStream out = conn.getOutputStream();
+            if (body != null) {
+                body.writeTo(contentType, out, charset);
+            } else {
+                form.writeTo(out, charset);
+            }
+            out.flush();
+            out.close();
+        }
+        conn.connect();
     }
 
     void close() {
@@ -132,33 +222,12 @@ class BaseHttpConnection {
         }
     }
 
-    void build(Headers globalHeaders) {
-        try {
-            conn = openConnection(this.url, this.proxy);
-            conn.setUseCaches(false);
-            conn.setChunkedStreamingMode(DEFAULT_CHUNK_LENGTH);
-            conn.setRequestMethod(method.value());
-            conn.setInstanceFollowRedirects(this.maxRedirectCount >= 1);
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setUseCaches(false);
-            conn.setConnectTimeout(connectTimeout);
-            conn.setReadTimeout(readTimeout);
-            configHttps(conn, this.hostnameVerifier, this.ssf);
-
-            addHeaders(conn, globalHeaders, headers);
-            addCookie(conn, this.url, this.cookieHome);
-        } catch (IOException e) {
-            throw new HttpBladeException(e);
-        }
-    }
-
     private static HttpURLConnection openConnection(URL url, Proxy proxy) throws IOException {
         URLConnection conn = proxy == null ? url.openConnection() : url.openConnection(proxy);
         if (conn instanceof HttpURLConnection) {
             return (HttpURLConnection) conn;
         }
-        throw new HttpBladeException("");
+        throw new HttpBladeException("the url protocol must be http or https");
     }
 
     private static void addHeaders(HttpURLConnection conn, Headers globalHeaders, Headers headers) {
@@ -177,6 +246,8 @@ class BaseHttpConnection {
         if (headers != null) {
             headers.forEach(consumer);
         }
+        // 增加 connection keep-alive，从而可以复用连接
+        conn.setRequestProperty(HttpHeader.CONNECTION, "Keep-Alive");
     }
 
     private static void configHttps(HttpURLConnection conn, HostnameVerifier hostnameVerifier, SSLSocketFactory ssf) {

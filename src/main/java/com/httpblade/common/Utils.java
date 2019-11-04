@@ -63,6 +63,9 @@ public final class Utils {
     }
 
     public static String encode(final String value, final String charsetName) {
+        if(value == null) {
+            return null;
+        }
         try {
             return URLEncoder.encode(value, charsetName);
         } catch (UnsupportedEncodingException e) {

@@ -58,7 +58,7 @@ public class BaseHttpClientImpl implements HttpClient {
     public Response request(Request request) {
         BaseHttpRequestImpl requestImpl = (BaseHttpRequestImpl) request;
         try {
-            return doRequest(createConnection(requestImpl));
+            return requestImpl.build(this).execute();
         } catch (IOException e) {
             throw new HttpBladeException(e);
         }
@@ -67,12 +67,12 @@ public class BaseHttpClientImpl implements HttpClient {
     @Override
     public void requestAsync(Request request, Callback callback) {
         BaseHttpRequestImpl requestImpl = (BaseHttpRequestImpl) request;
-        final BaseHttpConnection connection = createConnection(requestImpl);
+        final BaseHttpConnection connection = requestImpl.build(this);
         asyncExecutor.enqueue(new Task(callback) {
             @Override
             public void execute() {
                 try {
-                    Response response = doRequest(connection);
+                    Response response = connection.execute();
                     callback.success(response);
                 } catch (Exception e) {
                     if (callback != null) {
@@ -108,25 +108,20 @@ public class BaseHttpClientImpl implements HttpClient {
         return cookieHome;
     }
 
-    private BaseHttpConnection createConnection(BaseHttpRequestImpl requestImpl) {
-        BaseHttpConnection connection = new BaseHttpConnection()
-            .setUrl(requestImpl.getUrl())
-            .setMethod(requestImpl.getMethod())
-            .setProxy(proxy)
-            .setHeaders(requestImpl.getHeaders())
-            .setConnectTimeout((int) connectTimeout)
-            .setReadTimeout((int) readTimeout)
-            .setHostnameVerifier(hostnameVerifier)
-            .setSSLSocketFactory(sslSocketFactory)
-            .setCookieHome(this.cookieHome)
-            .setMaxRedirectCount(this.maxRedirectCount);
-        connection.build(globalHeaders);
-        return connection;
+    public Proxy proxy() {
+        return proxy;
     }
 
-    private Response doRequest(BaseHttpConnection conn) throws IOException {
-        conn.connect();
-        return conn.response();
+    public HostnameVerifier hostnameVerifier() {
+        return hostnameVerifier;
+    }
+
+    public SSLSocketFactory sslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    Headers globalHeaders() {
+        return globalHeaders;
     }
 
 }

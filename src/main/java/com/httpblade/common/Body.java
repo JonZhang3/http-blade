@@ -8,7 +8,9 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -40,72 +42,88 @@ public final class Body {
         return this.dataType == TYPE_STREAM;
     }
 
-    public String getStringData() {
-        return isString() ? (String) data : "";
-    }
-
-    public byte[] getBytesData() {
-        return getBytesData(StandardCharsets.UTF_8);
-    }
-
-    public InputStream getStreamData() {
-        return isStream() ? (InputStream) data : null;
-    }
-
-    public byte[] getBytesData(Charset charset) {
-        return isBytes() ? (byte[]) data : ((String) data).getBytes(charset);
-    }
-
     public String getContentType() {
         return contentType;
     }
 
     public RequestBody createOkhttpRequestBody(String contentType, Charset charset) {
-        if(data == null) {
+        if (data == null) {
             return null;
         }
-        if(contentType == null) {
-            contentType = this.contentType;
-        }
-        if(contentType == null && isString()) {
+        if (contentType == null && isString()) {
             contentType = ContentType.guessContentType(getStringData());
+            if (contentType == null) {
+                contentType = "";
+            }
         }
-        if(isBytes()) {
+        this.contentType = contentType;
+        if (isBytes()) {
             return RequestBody.create(MediaType.parse(contentType), getBytesData());
-        } else if(isString()) {
+        } else if (isString()) {
             return RequestBody.create(MediaType.parse(ContentType.addCharset(contentType, charset)), getStringData());
-        } else if(isStream()) {
+        } else if (isStream()) {
             return new StreamRequestBody(getStreamData());
         }
         return null;
     }
 
     public HttpEntity createApacheHttpEntity(String contentType, Charset charset) {
-        if(data == null) {
+        if (data == null) {
             return null;
         }
-        if(contentType == null) {
-            contentType = this.contentType;
-        }
-        if(contentType == null && isString()) {
+        if (contentType == null && isString()) {
             contentType = ContentType.guessContentType(getStringData());
-            this.contentType = contentType;
+            if (contentType == null) {
+                contentType = "";
+            }
         }
-        if(contentType == null) {
-            contentType = "";
-        }
-        if(isBytes()) {
+        this.contentType = contentType;
+        if (isBytes()) {
             return new ByteArrayEntity(getBytesData(), org.apache.http.entity.ContentType.parse(contentType));
-        } else if(isString()) {
+        } else if (isString()) {
             return new StringEntity(getStringData(),
                 org.apache.http.entity.ContentType.parse(ContentType.addCharset(contentType, charset)));
-        } else if(isStream()) {
+        } else if (isStream()) {
             return new InputStreamEntity(getStreamData(), org.apache.http.entity.ContentType.parse(contentType));
         }
         return null;
     }
 
+    public void writeTo(String contentType, OutputStream out, Charset charset) throws IOException {
+        if (data == null) {
+            return;
+        }
+        if (contentType == null && isString()) {
+            contentType = ContentType.guessContentType(getStringData());
+            if (contentType == null) {
+                contentType = "";
+            }
+        }
+        this.contentType = contentType;
+        if (isString()) {
+            out.write(getStringData().getBytes(charset));
+        } else if (isBytes()) {
+            out.write(getBytesData());
+        } else {
+            Utils.copy(getStreamData(), out);
+        }
+    }
 
+    private String getStringData() {
+        return isString() ? (String) data : "";
+    }
+
+    private byte[] getBytesData() {
+        return getBytesData(StandardCharsets.UTF_8);
+    }
+
+    private InputStream getStreamData() {
+        return isStream() ? (InputStream) data : null;
+    }
+
+    private byte[] getBytesData(Charset charset) {
+        return isBytes() ? (byte[]) data : ((String) data).getBytes(charset);
+    }
 
     public static Body create(String data) {
         return create(data, null);

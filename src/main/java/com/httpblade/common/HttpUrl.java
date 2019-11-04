@@ -168,6 +168,11 @@ public final class HttpUrl {
         this.hasChanged = true;
     }
 
+    public void setProtocolAndResetPort(String protocol) {
+        setProtocol(protocol);
+        setPort(getDefaultPort(protocol, this.port));
+    }
+
     public void setUsername(String username) {
         this.username = username;
         this.hasChanged = true;
@@ -319,12 +324,16 @@ public final class HttpUrl {
     }
 
     private static int getDefaultPort(String protocol) {
+        return getDefaultPort(protocol, -1);
+    }
+
+    private static int getDefaultPort(String protocol, int defaultPort) {
         if ("http".equals(protocol)) {
             return 80;
         } else if ("https".equals(protocol)) {
             return 443;
         }
-        return -1;
+        return defaultPort;
     }
 
     private static void joinQueries(List<String> queries, StringBuilder out) {

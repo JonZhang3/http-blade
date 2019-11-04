@@ -2,9 +2,9 @@ package com.httpblade.basehttp;
 
 import com.httpblade.HttpBladeException;
 import com.httpblade.base.AbstractRequest;
-import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.HttpUrl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,6 +14,7 @@ import java.util.Map;
 public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     private String url;
+    private HttpUrl httpUrl;
     private HttpMethod method;
 
     public BaseHttpRequestImpl() {
@@ -23,6 +24,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     @Override
     public BaseHttpRequestImpl url(String url) {
         this.url = url;
+        this.httpUrl = new HttpUrl(url);
         return this;
     }
 
@@ -94,8 +96,26 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
         return method;
     }
 
-    Headers getHeaders() {
-        return headers;
+    BaseHttpConnection build(BaseHttpClientImpl client) {
+        if(this.method == null) {
+            throw new HttpBladeException("must specify a http method");
+        }
+        return new BaseHttpConnection()
+            .setUrl(getUrl())
+            .setUrl(httpUrl)
+            .setMethod(getMethod())
+            .setProxy(client.proxy())
+            .setHeaders(headers)
+            .setConnectTimeout((int) client.connectTimeout())
+            .setReadTimeout((int) client.readTimeout())
+            .setHostnameVerifier(client.hostnameVerifier())
+            .setSSLSocketFactory(client.sslSocketFactory())
+            .setCookieHome(client.cookieHome())
+            .setForm(form)
+            .setBody(body)
+            .setCharset(charset)
+            .setMaxRedirectCount(client.maxRedirectCount())
+            .setGlobalHeaders(client.globalHeaders());
     }
 
 }

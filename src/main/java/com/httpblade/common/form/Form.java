@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class Form {
 
@@ -104,7 +105,7 @@ public class Form {
     }
 
     public String contentType() {
-        if(onlyNormalField()) {
+        if (onlyNormalField()) {
             return ContentType.FORM;
         }
         return ContentType.MULTIPART + ";boundary=" + BOUNDARY;
@@ -114,21 +115,32 @@ public class Form {
         return BOUNDARY;
     }
 
-    public String toParams(Charset charset) {
-        StringBuilder builder = new StringBuilder();
-        boolean first = true;
-        for (Field field : this.fields) {
-            if (first) first = false;
-            else builder.append("&");
+    public void forEachFields(Charset charset, Function<Integer, String, String> function) {
+        Field field;
+        for(int i = 0, len = fields.size(); i < len; i++) {
+            field = fields.get(i);
             String name = field.name();
             String value = field.value();
-            if (field.encoded()) {
-                builder.append(Utils.encode(name, charset.name()))
-                    .append("=").append(Utils.encode(name, charset.name()));
-            } else {
-                builder.append(name).append("=").append(value);
+            if(field.encoded()) {
+                name = Utils.encode(name, charset.name());
+                value = Utils.encode(value, charset.name());
             }
+            function.apply(i, name, value);
         }
+    }
+
+    // 拼接成请求参数格式的字符串
+    public String toParams(Charset charset) {
+        StringBuilder builder = new StringBuilder();
+        forEachFields(charset, (index, name, value) -> {
+            if(index != 0) {
+                builder.append('&');
+            }
+            builder.append(name);
+            if(value != null) {
+                builder.append('=').append(value);
+            }
+        });
         return builder.toString();
     }
 
@@ -171,6 +183,11 @@ public class Form {
             Utils.copy((InputStream) content, out);
         }
         Utils.write(out, charset, CRLF);
+    }
+
+    @FunctionalInterface
+    public interface Function<A, B, C> {
+        void apply(A a, B b, C c);
     }
 
 }

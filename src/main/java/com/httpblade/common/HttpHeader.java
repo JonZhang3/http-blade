@@ -12,5 +12,6 @@ public final class HttpHeader {
     public static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
     public static final String USER_AGENT = "User-Agent";
     public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
+    public static final String CONNECTION = "Connection";// keep-alive or close
 
 }

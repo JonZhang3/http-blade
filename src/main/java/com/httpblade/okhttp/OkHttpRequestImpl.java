@@ -87,13 +87,10 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     Request build(com.httpblade.common.Headers globalHeaders) {
         if (method == null) {
-            throw new HttpBladeException("must specify a method");
+            throw new HttpBladeException("must specify a http method");
         }
         HttpUrl.Builder urlBuilder = this.url.newBuilder();
-        if (method == HttpMethod.GET) {
-            OkHttpFormUtil.createGetUrl(form, urlBuilder);
-            builder.get();
-        } else {
+        if (HttpMethod.requiresRequestBody(method)) {
             if (body != null) {
                 builder.method(method.value(), body.createOkhttpRequestBody(header(HttpHeader.CONTENT_TYPE),
                     this.charset));
@@ -102,6 +99,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
                 builder.method(method.value(), body);
                 headers.set(HttpHeader.CONTENT_TYPE, form.contentType());
             }
+        } else {
+            OkHttpFormUtil.createGetUrl(form, urlBuilder);
+            builder.get();
         }
         setBasicAuth();
         builder.headers(createHeaders(globalHeaders));

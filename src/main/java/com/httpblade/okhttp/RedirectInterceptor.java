@@ -28,45 +28,56 @@ public class RedirectInterceptor implements Interceptor {
         Request request = chain.request();
         Response response = chain.proceed(request);
 
-        int code = response.code();
-        if (code == HttpStatus.REDIRECT) {
-            if (maxRedirectCount <= 0) {
-                return response;
-            }
-            int count = 1;
-            while (count <= maxRedirectCount) {
-                String location = response.header(HttpHeader.LOCATION);
-                if (Utils.isEmpty(location)) {
-                    return null;
-                }
-                // @see okhttp3.internal.http.RetryAndFollowUpInterceptor
-                HttpUrl url = response.request().url().resolve(location);
-                if (url == null) {
-                    return null;
-                }
-                Request.Builder newBuilder = response.request().newBuilder();
-                String method = response.request().method();
-                if (HttpMethod.permitsRequestBody(method)) {
-                    final boolean maintainBody = HttpMethod.redirectsWithBody(method);
-                    if (HttpMethod.redirectsToGet(method)) {
-                        newBuilder.method(com.httpblade.common.HttpMethod.GET.value(), null);
-                    } else {
-                        RequestBody requestBody = maintainBody ? response.request().body() : null;
-                        newBuilder.method(method, requestBody);
-                    }
-                    if (!maintainBody) {
-                        newBuilder.removeHeader("Transfer-Encoding");
-                        newBuilder.removeHeader("Content-Length");
-                        newBuilder.removeHeader("Content-Type");
-                    }
-                }
-                if (!Util.sameConnection(response.request().url(), url)) {
-                    newBuilder.removeHeader(HttpHeader.AUTHORIZATION);
-                }
-                Request newRequest = newBuilder.url(url).build();
-                response = chain.proceed(newRequest);
-            }
+        if(maxRedirectCount < 1) {
             return response;
+        }
+
+        int code = response.code();
+        String method = request.method();
+        // @see okhttp3.internal.http.RetryAndFollowUpInterceptor
+        switch (code) {
+            case HttpStatus.TEMP_REDIRECT:
+            case HttpStatus.PERM_REDIRECT:
+                if (!method.equals("GET") && !method.equals("HEAD")) {
+                    return response;
+                }
+            case HttpStatus.MULT_CHOICE:
+            case HttpStatus.MOVED_PERM:
+            case HttpStatus.MOVED_TEMP:
+            case HttpStatus.SEE_OTHER:
+                int count = 1;
+
+                while (count <= maxRedirectCount) {
+                    String location = response.header(HttpHeader.LOCATION);
+                    if (Utils.isEmpty(location)) {
+                        return response;
+                    }
+                    HttpUrl url = response.request().url().resolve(location);
+                    if (url == null) {
+                        return response;
+                    }
+                    Request.Builder newBuilder = response.request().newBuilder();
+                    if (HttpMethod.permitsRequestBody(method)) {
+                        final boolean maintainBody = HttpMethod.redirectsWithBody(method);
+                        if (HttpMethod.redirectsToGet(method)) {
+                            newBuilder.method(com.httpblade.common.HttpMethod.GET.value(), null);
+                        } else {
+                            RequestBody requestBody = maintainBody ? response.request().body() : null;
+                            newBuilder.method(method, requestBody);
+                        }
+                        if (!maintainBody) {
+                            newBuilder.removeHeader("Transfer-Encoding");
+                            newBuilder.removeHeader("Content-Length");
+                            newBuilder.removeHeader("Content-Type");
+                        }
+                    }
+                    if (!Util.sameConnection(response.request().url(), url)) {
+                        newBuilder.removeHeader(HttpHeader.AUTHORIZATION);
+                    }
+                    Request newRequest = newBuilder.url(url).build();
+                    response = chain.proceed(newRequest);
+                }
+                return response;
         }
         return response;
     }

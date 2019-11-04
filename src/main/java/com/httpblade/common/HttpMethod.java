@@ -22,7 +22,7 @@ public enum HttpMethod {
         return method;
     }
 
-    public static boolean needOutput(HttpMethod method) {
+    public static boolean requiresRequestBody(HttpMethod method) {
         return method == PUT || method == POST || method == DELETE || method == PATCH;
     }
 
