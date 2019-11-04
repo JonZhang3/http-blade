@@ -2,7 +2,9 @@ package com.httpblade.basehttp;
 
 import com.httpblade.HttpBladeException;
 import com.httpblade.base.AbstractRequest;
-import com.httpblade.common.*;
+import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
+import com.httpblade.common.HttpMethod;
 
 import java.net.MalformedURLException;
 import java.net.URL;

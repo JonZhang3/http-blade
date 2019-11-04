@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-class RequestWrapper {
+final class RequestWrapper {
 
     private HttpClient client;
     private final Request request;

@@ -3,10 +3,16 @@ package com.httpblade.basehttp;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.base.HttpClientBuilder;
-import com.httpblade.common.*;
+import com.httpblade.common.Defaults;
+import com.httpblade.common.GlobalProxyAuth;
+import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
+import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLSocketFactoryBuilder;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
+import java.net.Authenticator;
 import java.util.concurrent.TimeUnit;
 
 public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClientBuilderImpl> {
@@ -102,6 +108,12 @@ public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClie
     @Override
     public BaseHttpClientBuilderImpl proxy(String host, int port, String username, String password) {
         this.proxy = new Proxy(host, port, username, password);
+        return this;
+    }
+
+    @Override
+    public BaseHttpClientBuilderImpl globalProxyAuth(String username, String password) {
+        Authenticator.setDefault(new GlobalProxyAuth(username, password));
         return this;
     }
 

@@ -8,14 +8,24 @@ import com.httpblade.base.Request;
 import com.httpblade.base.Response;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
+import com.httpblade.common.Proxy;
 import com.httpblade.common.task.AsyncTaskExecutor;
 import com.httpblade.common.task.Task;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import java.io.IOException;
 
@@ -44,8 +54,29 @@ public class ApacheHttpClientImpl implements HttpClient {
     ApacheHttpClientImpl(ApacheHttpClientBuilderImpl clientBuilder) {
         this.requestConfig = clientBuilder.requestConfigBuilder.build();
         clientBuilder.clientBuilder.setDefaultRequestConfig(this.requestConfig);
-        this.writeTimeout = clientBuilder.writeTimeout;
+        Proxy proxy = clientBuilder.proxy;
+        if (proxy != null) {
+            if (proxy.getType() == java.net.Proxy.Type.HTTP) {
+                clientBuilder.clientBuilder.setProxy(new HttpHost(proxy.getHost(), proxy.getPort()));
+                if (proxy.hasAuth()) {
+                    CredentialsProvider cp = new BasicCredentialsProvider();
+                    cp.setCredentials(new AuthScope(proxy.getHost(), proxy.getPort()),
+                        new UsernamePasswordCredentials(proxy.getUsername(), proxy.getPassword()));
+                    clientBuilder.clientBuilder.setDefaultCredentialsProvider(cp);
+                }
+            } else if (proxy.getType() == java.net.Proxy.Type.SOCKS) {
+                Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("http", new SocketProxyConnectionFactory(proxy.getHost(), proxy.getPort()))
+                    .register("https", new SocketProxySSLConnectionFactory(null, null,
+                        proxy.getHost(), proxy.getPort()))
+                    .build();
+                PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(registry);
+                clientBuilder.clientBuilder.setConnectionManager(connManager);
+            }
+        }
         this.client = clientBuilder.clientBuilder.build();
+
+        this.writeTimeout = clientBuilder.writeTimeout;
         this.globalHeaders = clientBuilder.globalHeaders;
         this.cookieHome = clientBuilder.cookieHome;
     }

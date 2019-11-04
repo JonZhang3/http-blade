@@ -9,7 +9,12 @@ import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpStatus;
 import com.httpblade.common.Utils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;

@@ -13,7 +13,11 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -130,7 +134,7 @@ class BaseHttpConnection {
 
     void build(Headers globalHeaders) {
         try {
-            conn = opneConnection(this.url, this.proxy);
+            conn = openConnection(this.url, this.proxy);
             conn.setUseCaches(false);
             conn.setChunkedStreamingMode(DEFAULT_CHUNK_LENGTH);
             conn.setRequestMethod(method.value());
@@ -149,7 +153,7 @@ class BaseHttpConnection {
         }
     }
 
-    private static HttpURLConnection opneConnection(URL url, Proxy proxy) throws IOException {
+    private static HttpURLConnection openConnection(URL url, Proxy proxy) throws IOException {
         URLConnection conn = proxy == null ? url.openConnection() : url.openConnection(proxy);
         if (conn instanceof HttpURLConnection) {
             return (HttpURLConnection) conn;

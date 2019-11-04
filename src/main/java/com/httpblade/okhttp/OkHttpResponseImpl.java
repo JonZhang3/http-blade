@@ -7,7 +7,10 @@ import com.httpblade.common.Utils;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
 
 public class OkHttpResponseImpl implements com.httpblade.base.Response {

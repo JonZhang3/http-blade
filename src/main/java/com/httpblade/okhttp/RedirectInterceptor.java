@@ -3,7 +3,11 @@ package com.httpblade.okhttp;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpStatus;
 import com.httpblade.common.Utils;
-import okhttp3.*;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpMethod;
 
@@ -20,7 +24,7 @@ public class RedirectInterceptor implements Interceptor {
     }
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    public Response intercept(Interceptor.Chain chain) throws IOException {
         Request request = chain.request();
         Response response = chain.proceed(request);
 

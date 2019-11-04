@@ -5,7 +5,11 @@ import com.httpblade.common.form.Field;
 import com.httpblade.common.form.FileField;
 import com.httpblade.common.form.Form;
 import com.httpblade.common.form.StreamField;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 import java.util.List;
 

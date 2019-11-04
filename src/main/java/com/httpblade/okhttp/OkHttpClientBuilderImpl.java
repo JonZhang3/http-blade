@@ -3,12 +3,19 @@ package com.httpblade.okhttp;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.base.HttpClientBuilder;
-import com.httpblade.common.*;
+import com.httpblade.common.Defaults;
+import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
-import okhttp3.*;
+import com.httpblade.common.HttpHeader;
+import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLSocketFactoryBuilder;
+import com.httpblade.common.Utils;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 
 import javax.net.ssl.HostnameVerifier;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -111,6 +118,12 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
         Proxy proxy = new Proxy(host, port, username, password);
         builder.proxy(Utils.createProxy(proxy));
         builder.proxyAuthenticator(createAuthenticator(username, password));
+        return this;
+    }
+
+    @Override
+    public OkHttpClientBuilderImpl globalProxyAuth(String username, String password) {
+        java.net.Authenticator.setDefault(new GlobalProxyAuth(username, password));
         return this;
     }
 

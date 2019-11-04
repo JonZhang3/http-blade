@@ -106,6 +106,8 @@ public interface HttpClientBuilder<T extends HttpClientBuilder> {
 
     T proxy(String host, int port, String username, String password);
 
+    T globalProxyAuth(String username, String password);
+
     HttpClient build();
 
 }

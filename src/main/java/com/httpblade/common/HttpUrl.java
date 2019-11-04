@@ -4,7 +4,10 @@ import com.httpblade.HttpBladeException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public final class HttpUrl {
 

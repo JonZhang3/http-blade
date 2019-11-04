@@ -1,6 +1,11 @@
 package com.httpblade.base;
 
-import com.httpblade.common.*;
+import com.httpblade.common.Body;
+import com.httpblade.common.ContentType;
+import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
+import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Utils;
 import com.httpblade.common.form.Form;
 
 import java.io.File;

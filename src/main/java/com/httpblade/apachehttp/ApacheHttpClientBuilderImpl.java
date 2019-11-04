@@ -3,22 +3,19 @@ package com.httpblade.apachehttp;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.common.Defaults;
+import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 ;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
 import javax.net.ssl.HostnameVerifier;
+import java.net.Authenticator;
 import java.util.concurrent.TimeUnit;
 
 public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClientBuilder<ApacheHttpClientBuilderImpl> {
@@ -28,6 +25,7 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClien
     long writeTimeout = Defaults.WRITE_TIMEOUT;
     Headers globalHeaders = new Headers();
     CookieHome cookieHome;
+    Proxy proxy;
 
     public ApacheHttpClientBuilderImpl() {
         clientBuilder = HttpClients.custom();
@@ -114,39 +112,31 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClien
 
     @Override
     public ApacheHttpClientBuilderImpl proxy(Proxy proxy) {
-        if (proxy.hasAuth()) {
-            proxy(proxy.getHost(), proxy.getPort(), proxy.getUsername(), proxy.getPassword());
-        } else {
-            proxy(proxy.getHost(), proxy.getPort());
-        }
+        this.proxy = proxy;
         return this;
     }
 
     @Override
     public ApacheHttpClientBuilderImpl proxy(String host, int port) {
-        clientBuilder.setProxy(new HttpHost(host, port));
+        this.proxy = new Proxy(host, port);
         return this;
     }
 
     @Override
     public ApacheHttpClientBuilderImpl proxy(String host, int port, String username, String password) {
-        clientBuilder.setProxy(null);
-        CredentialsProvider cp = new BasicCredentialsProvider();
-        cp.setCredentials(new AuthScope(host, port), new UsernamePasswordCredentials(username, password));
-        clientBuilder.setDefaultCredentialsProvider(cp);
+        this.proxy = new Proxy(host, port, username, password);
+        return this;
+    }
+
+    @Override
+    public ApacheHttpClientBuilderImpl globalProxyAuth(String username, String password) {
+        Authenticator.setDefault(new GlobalProxyAuth(username, password));
         return this;
     }
 
     @Override
     public HttpClient build() {
         return new ApacheHttpClientImpl(this);
-    }
-
-    private static CredentialsProvider createCredentialsProvider(Proxy proxy) {
-        CredentialsProvider cp = new BasicCredentialsProvider();
-        cp.setCredentials(new AuthScope(proxy.getHost(), proxy.getPort()),
-            new UsernamePasswordCredentials(proxy.getUsername(), proxy.getPassword()));
-        return cp;
     }
 
 }

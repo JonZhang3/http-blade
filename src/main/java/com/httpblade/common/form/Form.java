@@ -4,7 +4,11 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.common.ContentType;
 import com.httpblade.common.Utils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
