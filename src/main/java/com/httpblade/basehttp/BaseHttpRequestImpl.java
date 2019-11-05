@@ -30,7 +30,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     @Override
     public BaseHttpRequestImpl method(HttpMethod method) {
-        if(HttpMethod.PATCH == method) {
+        if (HttpMethod.PATCH == method) {
             this.method = HttpMethod.POST;
             this.setHeader(HttpHeader.X_HTTP_METHOD_OVERRIDE, "PATCH");
         } else {
@@ -78,7 +78,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     }
 
     @Override
-    public BaseHttpRequestImpl pathParam(String name, String value) {
+    public BaseHttpRequestImpl pathVariable(String name, String value) {
         return null;
     }
 
@@ -97,14 +97,14 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     }
 
     BaseHttpConnection build(BaseHttpClientImpl client) {
-        if(this.method == null) {
+        if (this.method == null) {
             throw new HttpBladeException("must specify a http method");
         }
         return new BaseHttpConnection()
             .setUrl(getUrl())
             .setUrl(httpUrl)
             .setMethod(getMethod())
-            .setProxy(client.proxy())
+            .setProxy(client.javaProxy())
             .setHeaders(headers)
             .setConnectTimeout((int) client.connectTimeout())
             .setReadTimeout((int) client.readTimeout())

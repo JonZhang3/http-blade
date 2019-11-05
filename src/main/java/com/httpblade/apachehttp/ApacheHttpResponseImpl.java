@@ -1,6 +1,9 @@
 package com.httpblade.apachehttp;
 
+import com.httpblade.HttpBlade;
 import com.httpblade.HttpBladeException;
+import com.httpblade.JsonParserFactory;
+import com.httpblade.XmlParserFactory;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
@@ -21,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ApacheHttpResponseImpl implements Response {
+public final class ApacheHttpResponseImpl implements Response {
 
     private CloseableHttpResponse response;
     private URL url;
@@ -86,6 +89,24 @@ public class ApacheHttpResponseImpl implements Response {
         } catch (IOException e) {
             throw new HttpBladeException(e);
         }
+    }
+
+    @Override
+    public <T> T json(Class<T> type) {
+        JsonParserFactory factory = HttpBlade.getJsonParserFactory();
+        if (factory != null) {
+            return factory.fromJson(string(), type);
+        }
+        throw new HttpBladeException("you must specify a JsonParserFactory");
+    }
+
+    @Override
+    public <T> T xml(Class<T> type) {
+        XmlParserFactory factory = HttpBlade.getXmlParserFactory();
+        if (factory != null) {
+            return factory.fromXml(string(), type);
+        }
+        throw new HttpBladeException("you must specify a XmlParserFactory");
     }
 
     @Override

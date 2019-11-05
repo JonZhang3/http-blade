@@ -7,11 +7,14 @@ import com.httpblade.base.Request;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
+import com.httpblade.common.Proxy;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +23,7 @@ public class OkHttpClientImpl implements HttpClient {
     private OkHttpClient client;
     private int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
     private Headers globalHeaders;
+    private final Proxy proxy;
 
     public OkHttpClientImpl() {
         client = new OkHttpClientBuilderImpl()
@@ -31,12 +35,14 @@ public class OkHttpClientImpl implements HttpClient {
             .build();
         globalHeaders = new Headers();
         globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
+        proxy = null;
     }
 
     OkHttpClientImpl(OkHttpClientBuilderImpl clientBuilder) {
         this.client = clientBuilder.builder.build();
         this.maxRedirectCount = clientBuilder.maxRedirectCount;
         this.globalHeaders = clientBuilder.globalHeaders;
+        this.proxy = clientBuilder.proxy;
     }
 
     @Override
@@ -98,5 +104,20 @@ public class OkHttpClientImpl implements HttpClient {
             cookieHome = cookieJar.getCookieHome();
         }
         return cookieHome;
+    }
+
+    @Override
+    public HostnameVerifier hostnameVerifier() {
+        return client.hostnameVerifier();
+    }
+
+    @Override
+    public SSLSocketFactory sslSocketFactory() {
+        return client.sslSocketFactory();
+    }
+
+    @Override
+    public Proxy proxy() {
+        return proxy;
     }
 }

@@ -27,6 +27,7 @@ public class BaseHttpClientImpl implements HttpClient {
     private CookieHome cookieHome;
     private Headers globalHeaders;
     private Proxy proxy;
+    private com.httpblade.common.Proxy commonProxy;
     private HostnameVerifier hostnameVerifier;
     private SSLSocketFactory sslSocketFactory;
     private AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
@@ -43,9 +44,10 @@ public class BaseHttpClientImpl implements HttpClient {
         this.maxRedirectCount = clientBuilder.maxRedirectCount;
         this.cookieHome = clientBuilder.cookieHome;
         this.globalHeaders = clientBuilder.globalHeaders;
+        this.commonProxy = clientBuilder.proxy;
         if (clientBuilder.proxy != null) {
-            this.proxy = Utils.createProxy(clientBuilder.proxy);
-            if (clientBuilder.proxy.hasAuth()) {
+            this.proxy = com.httpblade.common.Proxy.toJavaProxy(this.commonProxy);
+            if (this.commonProxy.hasAuth()) {
                 globalHeaders.set(HttpHeader.PROXY_AUTHORIZATION,
                     Utils.basicAuthString(clientBuilder.proxy.getUsername(), clientBuilder.proxy.getPassword()));
             }
@@ -108,20 +110,27 @@ public class BaseHttpClientImpl implements HttpClient {
         return cookieHome;
     }
 
-    public Proxy proxy() {
-        return proxy;
+    @Override
+    public com.httpblade.common.Proxy proxy() {
+        return commonProxy;
     }
 
+    @Override
     public HostnameVerifier hostnameVerifier() {
         return hostnameVerifier;
     }
 
+    @Override
     public SSLSocketFactory sslSocketFactory() {
         return sslSocketFactory;
     }
 
     Headers globalHeaders() {
         return globalHeaders;
+    }
+
+    Proxy javaProxy() {
+        return proxy;
     }
 
 }

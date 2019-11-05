@@ -1,5 +1,8 @@
 package com.httpblade.base;
 
+import com.httpblade.HttpBlade;
+import com.httpblade.JsonParserFactory;
+import com.httpblade.XmlParserFactory;
 import com.httpblade.common.Body;
 import com.httpblade.common.ContentType;
 import com.httpblade.common.Headers;
@@ -172,14 +175,40 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
     }
 
     @Override
-    public T jsonBody(String body) {
-        this.body = Body.create(body, ContentType.JSON);
+    public T jsonBody(Object value) {
+        if (value != null) {
+            String result;
+            if (value instanceof CharSequence) {
+                result = value.toString();
+            } else {
+                JsonParserFactory factory = HttpBlade.getJsonParserFactory();
+                if (factory != null) {
+                    result = factory.toJson(value);
+                } else {
+                    result = value.toString();
+                }
+            }
+            this.body = Body.create(result, ContentType.JSON);
+        }
         return (T) this;
     }
 
     @Override
-    public T xmlBody(String body) {
-        this.body = Body.create(body, ContentType.XML);
+    public T xmlBody(Object body) {
+        if (body != null) {
+            String result;
+            if (body instanceof CharSequence) {
+                result = body.toString();
+            } else {
+                XmlParserFactory factory = HttpBlade.getXmlParserFactory();
+                if (factory != null) {
+                    result = factory.toXml(body);
+                } else {
+                    result = body.toString();
+                }
+            }
+            this.body = Body.create(result, ContentType.XML);
+        }
         return (T) this;
     }
 

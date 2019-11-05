@@ -1,6 +1,9 @@
 package com.httpblade.okhttp;
 
+import com.httpblade.HttpBlade;
 import com.httpblade.HttpBladeException;
+import com.httpblade.JsonParserFactory;
+import com.httpblade.XmlParserFactory;
 import com.httpblade.base.Cookie;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Utils;
@@ -54,6 +57,24 @@ public class OkHttpResponseImpl implements com.httpblade.base.Response {
             }
         }
         return "";
+    }
+
+    @Override
+    public <T> T json(Class<T> type) {
+        JsonParserFactory factory = HttpBlade.getJsonParserFactory();
+        if (factory != null) {
+            return factory.fromJson(string(), type);
+        }
+        throw new HttpBladeException("you must specify a JsonParserFactory");
+    }
+
+    @Override
+    public <T> T xml(Class<T> type) {
+        XmlParserFactory factory = HttpBlade.getXmlParserFactory();
+        if (factory != null) {
+            return factory.fromXml(string(), type);
+        }
+        throw new HttpBladeException("you must specify a XmlParserFactory");
     }
 
     @Override

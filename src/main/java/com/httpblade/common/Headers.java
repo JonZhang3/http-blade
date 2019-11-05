@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
  * @author Jon
  * @since 1.0.0
  */
-public class Headers {
+public final class Headers {
 
     private Map<String, List<String>> headers = new HashMap<>();
 

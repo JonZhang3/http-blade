@@ -121,7 +121,7 @@ public class Form {
             field = fields.get(i);
             String name = field.name();
             String value = field.value();
-            if(field.encoded()) {
+            if(!field.encoded()) {
                 name = Utils.encode(name, charset.name());
                 value = Utils.encode(value, charset.name());
             }
@@ -160,7 +160,7 @@ public class Form {
                 sb.append(TWO_DASHES).append(BOUNDARY).append(CRLF);
                 String name = field.name();
                 String value = field.value();
-                if (field.encoded()) {
+                if (!field.encoded()) {
                     name = Utils.encode(name, charset.name());
                     value = Utils.encode(value, charset.name());
                 }

@@ -70,7 +70,7 @@ public interface Request<T extends Request> {
 
     Map<String, List<String>> allHeaders();
 
-    T pathParam(String name, String value);
+    T pathVariable(String name, String value);
 
     T form(Map<String, String> values);
 
@@ -92,9 +92,9 @@ public interface Request<T extends Request> {
 
     T body(InputStream in);
 
-    T jsonBody(String body);
+    T jsonBody(Object obj);
 
-    T xmlBody(String body);
+    T xmlBody(Object body);
 
     T basicAuth(String username, String password);
 

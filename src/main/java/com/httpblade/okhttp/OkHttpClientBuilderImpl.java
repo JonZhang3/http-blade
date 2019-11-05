@@ -9,7 +9,6 @@ import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
-import com.httpblade.common.Utils;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
@@ -25,6 +24,7 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
     OkHttpClient.Builder builder;
     int maxRedirectCount;
     Headers globalHeaders = new Headers();
+    Proxy proxy;
 
     public OkHttpClientBuilderImpl() {
         builder = new OkHttpClient.Builder();
@@ -61,7 +61,7 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
 
     @Override
     public OkHttpClientBuilderImpl maxRedirectCount(int max) {
-        if(max > 0) {
+        if (max > 0) {
             this.maxRedirectCount = max;
             List<Interceptor> interceptors = builder.interceptors();
             interceptors.removeIf(interceptor -> interceptor.getClass().equals(RedirectInterceptor.class));
@@ -99,24 +99,27 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
     @Override
     public OkHttpClientBuilderImpl proxy(Proxy proxy) {
         if (proxy != null) {
-            builder.proxy(Utils.createProxy(proxy));
+            builder.proxy(Proxy.toJavaProxy(proxy));
             if (proxy.hasAuth()) {
                 builder.proxyAuthenticator(createAuthenticator(proxy.getUsername(), proxy.getPassword()));
             }
         }
+        this.proxy = proxy;
         return this;
     }
 
     @Override
     public OkHttpClientBuilderImpl proxy(String host, int port) {
-        builder.proxy(Utils.createProxy(new Proxy(host, port)));
+        this.proxy = new Proxy(host, port);
+        builder.proxy(Proxy.toJavaProxy(this.proxy));
         return this;
     }
 
     @Override
     public OkHttpClientBuilderImpl proxy(String host, int port, String username, String password) {
         Proxy proxy = new Proxy(host, port, username, password);
-        builder.proxy(Utils.createProxy(proxy));
+        this.proxy = proxy;
+        builder.proxy(Proxy.toJavaProxy(proxy));
         builder.proxyAuthenticator(createAuthenticator(username, password));
         return this;
     }

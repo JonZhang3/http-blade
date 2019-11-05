@@ -99,7 +99,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     }
 
     @Override
-    public ApacheHttpRequestImpl pathParam(String name, String value) {
+    public ApacheHttpRequestImpl pathVariable(String name, String value) {
         return this;
     }
 

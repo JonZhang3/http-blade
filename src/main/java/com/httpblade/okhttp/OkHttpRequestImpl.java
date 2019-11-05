@@ -71,8 +71,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     }
 
     @Override
-    public OkHttpRequestImpl pathParam(String name, String value) {
-        return null;
+    public OkHttpRequestImpl pathVariable(String name, String value) {
+
+        return this;
     }
 
     @Override

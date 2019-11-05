@@ -1,5 +1,10 @@
 package com.httpblade.base;
 
+import com.httpblade.common.Proxy;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * Http 客户端。首先构建 {@code Request}，使用
  * {@code HttpClient} 去调用，同步方式或异步方式
@@ -38,5 +43,11 @@ public interface HttpClient {
     int maxRedirectCount();
 
     CookieHome cookieHome();
+
+    HostnameVerifier hostnameVerifier();
+
+    SSLSocketFactory sslSocketFactory();
+
+    Proxy proxy();
 
 }

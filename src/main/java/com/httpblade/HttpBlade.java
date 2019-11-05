@@ -7,11 +7,20 @@ import com.httpblade.common.HttpMethod;
 
 public final class HttpBlade {
 
-    /** JDK 自带客户端类型 */
+    private static JsonParserFactory jsonParserFactory;
+    private static XmlParserFactory xmlParserFactory;
+
+    /**
+     * JDK 自带客户端类型
+     */
     public static final int CLIENT_TYPE_JDK = Environment.CLIENT_TYPE_JDK;
-    /** OKHttp 客户端类型 */
+    /**
+     * OKHttp 客户端类型
+     */
     public static final int CLIENT_TYPE_OKHTTP = Environment.CLIENT_TYPE_OKHTTP;
-    /** Apache http components 客户端类型 */
+    /**
+     * Apache http components 客户端类型
+     */
     public static final int CLIENT_TYPE_APACHE_HTTP = Environment.CLIENT_TYPE_APACHE_HTTP;
 
     public static void use(int clientType) {
@@ -30,15 +39,41 @@ public final class HttpBlade {
         return Environment.nowUseClientType;
     }
 
+    /**
+     * 设置默认的全局 Http 客户端
+     *
+     * @param httpClient 自定义的全局 Http 客户端
+     */
     public static void setDefaultClient(HttpClient httpClient) {
-        if(httpClient == null) {
+        if (httpClient == null) {
             throw new NullPointerException("the parameter is null");
         }
         Environment.defaultClient = httpClient;
     }
 
+    /**
+     * 获取当前默认的全局 Http 客户端
+     *
+     * @return Http 客户端
+     */
     public static HttpClient defaultClient() {
         return Environment.defaultClient;
+    }
+
+    public static void setJsonParserFactory(JsonParserFactory parserFactory) {
+        HttpBlade.jsonParserFactory = parserFactory;
+    }
+
+    public static JsonParserFactory getJsonParserFactory() {
+        return jsonParserFactory;
+    }
+
+    public static XmlParserFactory getXmlParserFactory() {
+        return xmlParserFactory;
+    }
+
+    public static void setXmlParserFactory(XmlParserFactory xmlParserFactory) {
+        HttpBlade.xmlParserFactory = xmlParserFactory;
     }
 
     public static RequestWrapper get(String url) {
@@ -75,6 +110,10 @@ public final class HttpBlade {
 
     public static RequestWrapper patch(String url) {
         return new RequestWrapper(defaultClient(), createRequest(), url, HttpMethod.PATCH);
+    }
+
+    public static <T> T create(Class<T> serviceClass) {
+        return null;
     }
 
 }

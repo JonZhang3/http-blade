@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Api {
+@Target(ElementType.METHOD)
+public @interface Get {
 
-    String url() default "";
+    String value() default "";
 
 }

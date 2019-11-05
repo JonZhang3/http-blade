@@ -1,5 +1,11 @@
 package com.httpblade.common;
 
+import com.httpblade.HttpBladeException;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+
 public final class Proxy {
 
     private final java.net.Proxy.Type type;
@@ -46,6 +52,15 @@ public final class Proxy {
 
     public boolean hasAuth() {
         return username != null && password != null;
+    }
+
+    public static java.net.Proxy toJavaProxy(final Proxy proxy) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(proxy.getHost());
+            return new java.net.Proxy(proxy.getType(), new InetSocketAddress(inetAddress, proxy.getPort()));
+        } catch (UnknownHostException e) {
+            throw new HttpBladeException(e);
+        }
     }
 
 }

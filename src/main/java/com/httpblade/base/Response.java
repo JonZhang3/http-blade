@@ -19,6 +19,10 @@ public interface Response {
 
     String string();
 
+    <T> T json(Class<T> type);
+
+    <T> T xml(Class<T> type);
+
     InputStream stream();
 
     Reader reader();

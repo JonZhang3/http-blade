@@ -8,9 +8,10 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Api {
+@Target(ElementType.METHOD)
 
-    String url() default "";
+public @interface Post {
+
+    String value() default "";
 
 }

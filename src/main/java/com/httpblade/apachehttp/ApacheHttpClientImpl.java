@@ -8,6 +8,7 @@ import com.httpblade.base.Request;
 import com.httpblade.base.Response;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
+import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.task.AsyncTaskExecutor;
 import com.httpblade.common.task.Task;
@@ -27,16 +28,21 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 
 public class ApacheHttpClientImpl implements HttpClient {
 
-    private CloseableHttpClient client;
-    private RequestConfig requestConfig;
+    private final CloseableHttpClient client;
+    private final RequestConfig requestConfig;
     private long writeTimeout = Defaults.WRITE_TIMEOUT;
-    private Headers globalHeaders;
+    private final Headers globalHeaders;
     private CookieHome cookieHome;
-    private AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
+    private final HostnameVerifier hostnameVerifier;
+    private final SSLSocketFactory sslSocketFactory;
+    private final Proxy proxy;
+    private final AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
 
     public ApacheHttpClientImpl() {
         HttpClientBuilder clientBuilder = HttpClients.custom();
@@ -49,12 +55,17 @@ public class ApacheHttpClientImpl implements HttpClient {
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.disableCookieManagement();
         client = clientBuilder.build();
+        globalHeaders = new Headers();
+        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
+        hostnameVerifier = null;
+        sslSocketFactory = null;
+        proxy = null;
     }
 
     ApacheHttpClientImpl(ApacheHttpClientBuilderImpl clientBuilder) {
         this.requestConfig = clientBuilder.requestConfigBuilder.build();
         clientBuilder.clientBuilder.setDefaultRequestConfig(this.requestConfig);
-        Proxy proxy = clientBuilder.proxy;
+        this.proxy = clientBuilder.proxy;
         if (proxy != null) {
             if (proxy.getType() == java.net.Proxy.Type.HTTP) {
                 clientBuilder.clientBuilder.setProxy(new HttpHost(proxy.getHost(), proxy.getPort()));
@@ -75,7 +86,8 @@ public class ApacheHttpClientImpl implements HttpClient {
             }
         }
         this.client = clientBuilder.clientBuilder.build();
-
+        this.hostnameVerifier = clientBuilder.hostnameVerifier;
+        this.sslSocketFactory = clientBuilder.sslSocketFactory;
         this.writeTimeout = clientBuilder.writeTimeout;
         this.globalHeaders = clientBuilder.globalHeaders;
         this.cookieHome = clientBuilder.cookieHome;
@@ -134,6 +146,21 @@ public class ApacheHttpClientImpl implements HttpClient {
     @Override
     public CookieHome cookieHome() {
         return cookieHome;
+    }
+
+    @Override
+    public HostnameVerifier hostnameVerifier() {
+        return hostnameVerifier;
+    }
+
+    @Override
+    public SSLSocketFactory sslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    @Override
+    public Proxy proxy() {
+        return proxy;
     }
 
 }

@@ -15,6 +15,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 import java.net.Authenticator;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,8 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClien
     Headers globalHeaders = new Headers();
     CookieHome cookieHome;
     Proxy proxy;
+    HostnameVerifier hostnameVerifier;
+    SSLSocketFactory sslSocketFactory;
 
     public ApacheHttpClientBuilderImpl() {
         clientBuilder = HttpClients.custom();
@@ -87,6 +90,7 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClien
     @Override
     public ApacheHttpClientBuilderImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
         clientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+        this.hostnameVerifier = hostnameVerifier;
         return this;
     }
 
@@ -94,6 +98,7 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClien
     public ApacheHttpClientBuilderImpl sslSocketFactory(final SSLSocketFactoryBuilder builder) {
         if (builder != null) {
             clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(builder.buildContext()));
+            this.sslSocketFactory = builder.build();
         }
         return this;
     }

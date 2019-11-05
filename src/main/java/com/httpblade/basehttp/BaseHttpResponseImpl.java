@@ -1,6 +1,9 @@
 package com.httpblade.basehttp;
 
+import com.httpblade.HttpBlade;
 import com.httpblade.HttpBladeException;
+import com.httpblade.JsonParserFactory;
+import com.httpblade.XmlParserFactory;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
@@ -89,10 +92,28 @@ public class BaseHttpResponseImpl implements Response {
 
     @Override
     public String string() {
-        if(charset == null) {
+        if (charset == null) {
             charset = StandardCharsets.UTF_8;
         }
         return new String(bytes(), charset);
+    }
+
+    @Override
+    public <T> T json(Class<T> type) {
+        JsonParserFactory factory = HttpBlade.getJsonParserFactory();
+        if (factory != null) {
+            return factory.fromJson(string(), type);
+        }
+        throw new HttpBladeException("you must specify a JsonParserFactory");
+    }
+
+    @Override
+    public <T> T xml(Class<T> type) {
+        XmlParserFactory factory = HttpBlade.getXmlParserFactory();
+        if (factory != null) {
+            return factory.fromXml(string(), type);
+        }
+        throw new HttpBladeException("you must specify a XmlParserFactory");
     }
 
     @Override
@@ -199,7 +220,7 @@ public class BaseHttpResponseImpl implements Response {
                 throw new HttpBladeException(e);
             }
         }
-        if(conn != null) {
+        if (conn != null) {
             conn.close();
         }
     }
