@@ -44,7 +44,7 @@ public final class HttpUrl {
     }
 
     public HttpUrl(okhttp3.HttpUrl httpUrl) {
-        if(httpUrl == null) {
+        if (httpUrl == null) {
             throw new NullPointerException("the parameter is null");
         }
         this.newUrl = this.rawUrl = httpUrl.toString();
@@ -121,10 +121,6 @@ public final class HttpUrl {
         this.hasChanged = true;
     }
 
-    public boolean containsQueryName(String name) {
-        return this.queries.containsKey(name);
-    }
-
     public String getQuery(String name) {
         return this.queries.get(name).get(0);
     }
@@ -152,11 +148,12 @@ public final class HttpUrl {
         this.hasChanged = true;
     }
 
-    public void setPathParam(String name, String value) {
-        if(name == null || value == null) {
+    public void setPathVariable(String name, String value) {
+        if (name == null || value == null) {
             return;
         }
-
+        this.path = path.replaceAll("\\{ + name + \\}", Utils.encode(value, "UTF-8"));
+        this.hasChanged = true;
     }
 
     public void setProtocol(String protocol) {
@@ -218,6 +215,26 @@ public final class HttpUrl {
         }
     }
 
+    public okhttp3.HttpUrl toOkHttpUrl() {
+        okhttp3.HttpUrl.Builder builder = new okhttp3.HttpUrl.Builder()
+            .scheme(protocol)
+            .username(username)
+            .password(password)
+            .host(host)
+            .addPathSegment(path);
+        if (queries.size() > 0) {
+            for (Map.Entry<String, List<String>> entry : queries.entrySet()) {
+                String name = entry.getKey();
+                List<String> values = entry.getValue();
+                for (String value : values) {
+                    builder.addQueryParameter(name, value);
+                }
+            }
+        }
+        builder.fragment(hash);
+        return builder.build();
+    }
+
     @Override
     public int hashCode() {
         return toString().hashCode();
@@ -252,7 +269,7 @@ public final class HttpUrl {
         }
 
         if (host != null) {
-            if (host.indexOf(':') > 0) {
+            if (host.indexOf(':') >= 0) {
                 result.append("[").append(host).append("]");
             } else {
                 result.append(host);
@@ -281,22 +298,6 @@ public final class HttpUrl {
         newUrl = result.toString();
         hasChanged = false;
         return newUrl;
-    }
-
-    private static void parseQueryString(final String queryString, final List<String> queries) {
-        if (Utils.isNotEmpty(queryString)) {
-            String[] nameAndValues = queryString.split("&");
-            for (String nameAndValue : nameAndValues) {
-                int equalIndex = nameAndValue.indexOf('=');
-                if (equalIndex < 0) {
-                    queries.add(nameAndValue);
-                    queries.add(null);
-                } else {
-                    queries.add(nameAndValue.substring(0, equalIndex));
-                    queries.add(nameAndValue.substring(equalIndex + 1));
-                }
-            }
-        }
     }
 
     private static void parseQueryString(final String queryString, final Map<String, List<String>> queries) {
@@ -334,19 +335,6 @@ public final class HttpUrl {
             return 443;
         }
         return defaultPort;
-    }
-
-    private static void joinQueries(List<String> queries, StringBuilder out) {
-        for (int i = 0, len = queries.size(); i < len; i += 2) {
-            if (i > 0) {
-                out.append('&');
-            }
-            out.append(queries.get(i));
-            String value = queries.get(i + 1);
-            if (value != null) {
-                out.append('=').append(value);
-            }
-        }
     }
 
     private static void joinQueries(final Map<String, List<String>> queries, final StringBuilder out) {

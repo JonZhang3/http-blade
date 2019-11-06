@@ -18,11 +18,16 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     private Request.Builder builder = new Request.Builder();
     private HttpUrl url;
+    private String path;
     private HttpMethod method;
 
     @Override
     public OkHttpRequestImpl url(String url) {
         this.url = HttpUrl.parse(url);
+        if(this.url == null) {
+            throw new HttpBladeException("the url is null or error");
+        }
+        this.path = this.url.encodedPath();
         return this;
     }
 
@@ -72,7 +77,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl pathVariable(String name, String value) {
-
+        if(path != null) {
+            path = path.replaceAll("\\{ + name + \\}", value);
+        }
         return this;
     }
 
@@ -91,6 +98,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             throw new HttpBladeException("must specify a http method");
         }
         HttpUrl.Builder urlBuilder = this.url.newBuilder();
+        urlBuilder.addEncodedPathSegment(path);
         if (HttpMethod.requiresRequestBody(method)) {
             if (body != null) {
                 builder.method(method.value(), body.createOkhttpRequestBody(header(HttpHeader.CONTENT_TYPE),

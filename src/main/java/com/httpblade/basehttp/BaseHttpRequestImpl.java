@@ -17,10 +17,6 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     private HttpUrl httpUrl;
     private HttpMethod method;
 
-    public BaseHttpRequestImpl() {
-
-    }
-
     @Override
     public BaseHttpRequestImpl url(String url) {
         this.url = url;
@@ -79,16 +75,13 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     @Override
     public BaseHttpRequestImpl pathVariable(String name, String value) {
-        return null;
+        httpUrl.setPathVariable(name, value);
+        return this;
     }
 
     @Override
     public URL getUrl() {
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            throw new HttpBladeException(e);
-        }
+        return httpUrl.toURL();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.httpblade.annotation;
+package com.httpblade.annotation.method;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Delete {
+public @interface Options {
 
     String value() default "";
 

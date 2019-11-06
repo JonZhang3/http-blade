@@ -14,10 +14,12 @@ public final class HttpBlade {
      * JDK 自带客户端类型
      */
     public static final int CLIENT_TYPE_JDK = Environment.CLIENT_TYPE_JDK;
+
     /**
      * OKHttp 客户端类型
      */
     public static final int CLIENT_TYPE_OKHTTP = Environment.CLIENT_TYPE_OKHTTP;
+
     /**
      * Apache http components 客户端类型
      */

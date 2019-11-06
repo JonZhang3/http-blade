@@ -155,24 +155,21 @@ class BaseHttpConnection {
     private Response innerExecute(int redirectCount) throws IOException {
         initConnection();
         connect();
-        if (maxRedirectCount < 1) {
-            return new BaseHttpResponseImpl(this);
-        }
         int code = conn.getResponseCode();
         switch (code) {
             case HttpStatus.TEMP_REDIRECT:
             case HttpStatus.PERM_REDIRECT:
                 if (method != HttpMethod.GET && method != HttpMethod.HEAD) {
-                    return null;
+                    return new BaseHttpResponseImpl(this);
                 }
             case HttpStatus.MULT_CHOICE:
             case HttpStatus.MOVED_PERM:
             case HttpStatus.MOVED_TEMP:
             case HttpStatus.SEE_OTHER:
-                if (redirectCount <= maxRedirectCount) {
-                    return innerExecute(++redirectCount);
-                } else {
+                if(maxRedirectCount < 1 || redirectCount > maxRedirectCount) {
                     return new BaseHttpResponseImpl(this);
+                } else {
+                    return innerExecute(++redirectCount);
                 }
             default:
                 return new BaseHttpResponseImpl(this);

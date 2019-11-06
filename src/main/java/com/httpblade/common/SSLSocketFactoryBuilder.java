@@ -12,8 +12,14 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public final class SSLSocketFactoryBuilder {
 
@@ -35,8 +41,11 @@ public final class SSLSocketFactoryBuilder {
     public static final String KEY_STORE_TYPE_PKCS12 = "PKCS12";
 
     private String protocol = PROTOCOL_TLS;
+    private Provider provider;
     private KeyManager keyManager;
-    private X509TrustManager trustManager;
+    private Set<KeyManager> keyManagers = new LinkedHashSet<>();
+    private TrustManager trustManager;
+    private Set<TrustManager> trustManagers = new LinkedHashSet<>();
     private SecureRandom secureRandom = new SecureRandom();
 
     public SSLSocketFactoryBuilder() {
@@ -60,12 +69,35 @@ public final class SSLSocketFactoryBuilder {
         return this;
     }
 
-    public SSLSocketFactoryBuilder setKeyManager(KeyManager keyManager) {
-        this.keyManager = keyManager;
+    public SSLSocketFactoryBuilder setProvider(Provider provider) {
+        this.provider = provider;
         return this;
     }
 
-    public SSLSocketFactoryBuilder setTrustManager(X509TrustManager trustManager) {
+    public SSLSocketFactoryBuilder setProvider(String name) {
+        this.provider = Security.getProvider(name);
+        return this;
+    }
+
+    public SSLSocketFactoryBuilder addKeyManager(KeyManager keyManager) {
+
+        return this;
+    }
+
+    public SSLSocketFactoryBuilder addKeyManager(KeyStore keyStore, String password) {
+
+        return this;
+    }
+
+    public SSLSocketFactoryBuilder addKeyManager(String fileLocation, String password) {
+        return addKeyManager(fileLocation, KEY_STORE_TYPE_PKCS12, password);
+    }
+
+    public SSLSocketFactoryBuilder addKeyManager(String fileLocation, String keyStoreType, String password) {
+        return this;
+    }
+
+    public SSLSocketFactoryBuilder addTrustManager(TrustManager trustManager) {
         if (trustManager != null) {
             this.trustManager = trustManager;
         }
@@ -84,7 +116,7 @@ public final class SSLSocketFactoryBuilder {
     }
 
     public X509TrustManager getTrustManager() {
-        return trustManager;
+        return null;
     }
 
     public SSLContext buildContext() {

@@ -14,6 +14,7 @@ import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -73,6 +74,11 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
     @Override
     public OkHttpClientBuilderImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
         builder.hostnameVerifier(hostnameVerifier);
+        return this;
+    }
+
+    public OkHttpClientBuilderImpl socketFactory(SocketFactory socketFactory) {
+        this.builder.socketFactory(socketFactory);
         return this;
     }
 

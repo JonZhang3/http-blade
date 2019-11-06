@@ -31,12 +31,6 @@ public class RedirectInterceptor implements Interceptor {
         Request request = chain.request();
         RealInterceptorChain realChain = (RealInterceptorChain) chain;
         Transmitter transmitter = realChain.transmitter();
-        if (maxRedirectCount < 1) {
-            transmitter.prepareToConnect(request);
-            if (transmitter.isCanceled()) {
-                throw new HttpBladeException("is canceled");
-            }
-        }
         String method = request.method();
         int redirectCount = 1;
         while (true) {
@@ -56,38 +50,37 @@ public class RedirectInterceptor implements Interceptor {
                 case HttpStatus.MOVED_PERM:
                 case HttpStatus.MOVED_TEMP:
                 case HttpStatus.SEE_OTHER:
-                    if (redirectCount <= maxRedirectCount) {
-                        String location = response.header(HttpHeader.LOCATION);
-                        if (Utils.isEmpty(location)) {
-                            return response;
-                        }
-                        HttpUrl url = response.request().url().resolve(location);
-                        if (url == null) {
-                            return response;
-                        }
-                        Request.Builder newBuilder = response.request().newBuilder();
-                        if (HttpMethod.permitsRequestBody(method)) {
-                            final boolean maintainBody = HttpMethod.redirectsWithBody(method);
-                            if (HttpMethod.redirectsToGet(method)) {
-                                newBuilder.method(com.httpblade.common.HttpMethod.GET.value(), null);
-                            } else {
-                                RequestBody requestBody = maintainBody ? response.request().body() : null;
-                                newBuilder.method(method, requestBody);
-                            }
-                            if (!maintainBody) {
-                                newBuilder.removeHeader("Transfer-Encoding");
-                                newBuilder.removeHeader("Content-Length");
-                                newBuilder.removeHeader("Content-Type");
-                            }
-                        }
-                        if (!Util.sameConnection(response.request().url(), url)) {
-                            newBuilder.removeHeader(HttpHeader.AUTHORIZATION);
-                        }
-                        request = newBuilder.url(url).build();
-                        redirectCount++;
-                    } else {
+                    if (maxRedirectCount < 1 || redirectCount > maxRedirectCount) {
                         return response;
                     }
+                    String location = response.header(HttpHeader.LOCATION);
+                    if (Utils.isEmpty(location)) {
+                        return response;
+                    }
+                    HttpUrl url = response.request().url().resolve(location);
+                    if (url == null) {
+                        return response;
+                    }
+                    Request.Builder newBuilder = response.request().newBuilder();
+                    if (HttpMethod.permitsRequestBody(method)) {
+                        final boolean maintainBody = HttpMethod.redirectsWithBody(method);
+                        if (HttpMethod.redirectsToGet(method)) {
+                            newBuilder.method(com.httpblade.common.HttpMethod.GET.value(), null);
+                        } else {
+                            RequestBody requestBody = maintainBody ? response.request().body() : null;
+                            newBuilder.method(method, requestBody);
+                        }
+                        if (!maintainBody) {
+                            newBuilder.removeHeader("Transfer-Encoding");
+                            newBuilder.removeHeader("Content-Length");
+                            newBuilder.removeHeader("Content-Type");
+                        }
+                    }
+                    if (!Util.sameConnection(response.request().url(), url)) {
+                        newBuilder.removeHeader(HttpHeader.AUTHORIZATION);
+                    }
+                    request = newBuilder.url(url).build();
+                    redirectCount++;
                     break;
                 default:
                     return response;
