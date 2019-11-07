@@ -9,6 +9,7 @@ public final class ContentType {
 
     public static final String JSON = "application/json";
     public static final String XML = "application/xml";
+    public static final String TEXT = "text/plain";
     public static final String HTML = "text/html";
     public static final String FORM = "application/x-www-form-urlencoded";
     public static final String MULTIPART = "multipart/form-data";
@@ -85,12 +86,13 @@ public final class ContentType {
             switch (firstChar) {
                 case '[':
                 case '{':
-                    contentType = ContentType.JSON;
+                    contentType = JSON;
                     break;
                 case '<':
-                    contentType = ContentType.XML;
+                    contentType = XML;
                     break;
                 default:
+                    contentType = TEXT;
             }
         }
         return contentType;

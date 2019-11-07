@@ -4,23 +4,16 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.base.AbstractRequest;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
-import com.httpblade.common.ContentType;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
-import com.httpblade.common.HttpUrl;
-import com.httpblade.common.form.Field;
-import com.httpblade.common.form.Form;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.HeaderGroup;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,7 +27,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     private HttpMethod method;
     private String url;
-    private HeaderGroup headerGroup = new HeaderGroup();
+    private HttpEntityRequestImpl request = new HttpEntityRequestImpl();
 
     public ApacheHttpRequestImpl() {
 
@@ -42,8 +35,8 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public ApacheHttpRequestImpl url(String url) {
-        if(url == null) {
-            throw new HttpBladeException("the url is null");
+        if (url == null) {
+            throw new HttpBladeException("must specify a http url");
         }
         this.url = url;
         return this;
@@ -52,45 +45,37 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     @Override
     public ApacheHttpRequestImpl method(HttpMethod method) {
         this.method = method;
+        request.setMethod(method);
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl setHeader(String name, String value) {
-        this.headerGroup.updateHeader(new BasicHeader(name, value));
+        request.setHeader(name, value);
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl addHeader(String name, String value) {
-        this.headerGroup.addHeader(new BasicHeader(name, value));
+        request.addHeader(name, value);
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl removeHeader(String name) {
-        if(name != null) {
-            HeaderIterator iterator = headerGroup.iterator();
-            while (iterator.hasNext()) {
-                Header header = iterator.nextHeader();
-                if(name.equalsIgnoreCase(header.getName())) {
-                    iterator.remove();
-                }
-            }
-        }
-
+        request.removeHeaders(name);
         return this;
     }
 
     @Override
     public boolean containsHeader(String name) {
-        return headerGroup.containsHeader(name);
+        return request.containsHeader(name);
     }
 
     @Override
     public String header(String name) {
-        Header header = headerGroup.getFirstHeader(name);
-        if(header != null) {
+        Header header = request.getFirstHeader(name);
+        if (header != null) {
             return header.getValue();
         }
         return null;
@@ -98,7 +83,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public List<String> headers(String name) {
-        HeaderIterator iterator = headerGroup.iterator(name);
+        HeaderIterator iterator = request.headerIterator(name);
         List<String> result = new ArrayList<>();
         while (iterator.hasNext()) {
             result.add(iterator.nextHeader().getValue());
@@ -108,7 +93,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public Map<String, List<String>> allHeaders() {
-        Header[] allHeaders = headerGroup.getAllHeaders();
+        Header[] allHeaders = request.getAllHeaders();
         Headers headers = new Headers();
         if (allHeaders != null) {
             for (Header header : allHeaders) {
@@ -120,6 +105,9 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public ApacheHttpRequestImpl pathVariable(String name, String value) {
+        if (url == null) {
+            throw new NullPointerException("the url is null");
+        }
         url = url.replaceAll("\\{ + name + \\}", value);
         return this;
     }
@@ -139,58 +127,43 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     }
 
     HttpUriRequest build(Headers globalHeaders, CookieHome cookieHome) {
-        HttpRequestBase request;
+        if (method == null) {
+            throw new HttpBladeException("must specify a http method");
+        }
+        if (url == null) {
+            throw new HttpBladeException("must specify a http url");
+        }
+        String contentType = this.header(HttpHeader.CONTENT_TYPE);
         URI uri = URI.create(url);
         HttpEntity entity = null;
-        if(!HttpMethod.requiresRequestBody(this.method)) {
+        if (!HttpMethod.requiresRequestBody(this.method)) {
             URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
             this.form.forEachFields(this.charset, (index, name, value) -> uriBuilder.addParameter(name, value));
             try {
                 uri = uriBuilder.build();
             } catch (URISyntaxException ignore) {
             }
-        } else if(body != null) {
-            entity = this.body.createApacheHttpEntity("", charset);
+        } else if (body != null) {
+            entity = this.body.createApacheHttpEntity(contentType, charset);
         } else {
             entity = new MultipartFormEntity(form, charset);
         }
-        if(entity == null) {
-            request = new HttpRequestImpl(method.value());
-        } else {
-            request = new HttpEntityRequestImpl(method.value());
-            ((HttpEntityRequestImpl) request).setEntity(entity);
+
+        if (entity != null) {
+            request.setEntity(entity);
         }
         request.setURI(uri);
         setGlobalHeaders(request, globalHeaders);
-        request.setHeaders(headerGroup.getAllHeaders());
         addCookie(request, cookieHome);
-//        if (body != null) {
-//            builder.setEntity(this.body.createApacheHttpEntity(contentType, charset));
-//            if (contentType == null) {
-//                this.setHeader(HttpHeader.CONTENT_TYPE, body.getContentType());
-//            }
-//        } else {
-//            if (builder.getMethod().equalsIgnoreCase(HttpMethod.GET.value()) || this.form.onlyNormalField()) {
-//                for (Field field : form.fields()) {
-//                    builder.addParameter(field.name(), field.value());
-//                }
-//                if (contentType == null) {
-//                    this.setHeader(HttpHeader.CONTENT_TYPE, ContentType.FORM);
-//                }
-//            } else {
-//                MultipartFormEntity multipartFormEntity = new MultipartFormEntity(form, charset);
-//                if (contentType == null) {
-//                    this.setHeader(HttpHeader.CONTENT_TYPE, form.contentType());
-//                }
-//                builder.setEntity(multipartFormEntity);
-//            }
-//        }
         return request;
     }
 
     private static void setGlobalHeaders(HttpRequestBase request, Headers globalHeaders) {
         if (globalHeaders != null) {
             globalHeaders.forEach((name, values) -> {
+                if (request.containsHeader(name)) {
+                    return;
+                }
                 if (values.size() == 1) {
                     request.setHeader(name, values.get(0));
                 } else {
@@ -214,26 +187,12 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         }
     }
 
-    private static class HttpRequestImpl extends HttpRequestBase {
-
-        private String method;
-
-        HttpRequestImpl(String method) {
-            this.method = method;
-        }
-
-        @Override
-        public String getMethod() {
-            return method;
-        }
-    }
-
     private static class HttpEntityRequestImpl extends HttpEntityEnclosingRequestBase {
 
         private String method;
 
-        HttpEntityRequestImpl(String method) {
-            this.method = method;
+        public void setMethod(HttpMethod method) {
+            this.method = method.value();
         }
 
         @Override

@@ -18,8 +18,8 @@ public class ApiMethod {
 
     }
 
-    public Object execute(HttpClient client) {
-        return client.request(request);
+    public Object execute(Object... args) {
+        return null;
     }
 
 }

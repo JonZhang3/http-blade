@@ -42,6 +42,10 @@ public final class Headers {
         return this;
     }
 
+    private void addAll(String name, List<String> values) {
+        headers.put(name, values);
+    }
+
     public Headers remove(String name) {
         headers.remove(name);
         return this;
@@ -78,6 +82,18 @@ public final class Headers {
 
     public void forEach(BiConsumer<String, List<String>> consumer) {
         headers.forEach(consumer);
+    }
+
+    public Headers merge(Headers other) {
+        final Headers that = this;
+        if (other != null) {
+            other.forEach((name, values) -> {
+                if (!that.contain(name)) {
+                    that.addAll(name, values);
+                }
+            });
+        }
+        return this;
     }
 
     @Override

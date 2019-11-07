@@ -12,7 +12,6 @@ import okhttp3.RequestBody;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
@@ -24,7 +23,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     @Override
     public OkHttpRequestImpl url(String url) {
         this.url = HttpUrl.parse(url);
-        if(this.url == null) {
+        if (this.url == null) {
             throw new HttpBladeException("the url is null or error");
         }
         this.path = this.url.encodedPath();
@@ -77,7 +76,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl pathVariable(String name, String value) {
-        if(path != null) {
+        if (path != null) {
             path = path.replaceAll("\\{ + name + \\}", value);
         }
         return this;
@@ -120,15 +119,12 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     private Headers createHeaders(com.httpblade.common.Headers globalHeaders) {
         Headers.Builder builder = new Headers.Builder();
-        BiConsumer<String, List<String>> consumer = (name, values) -> {
+        this.headers.merge(globalHeaders);
+        this.headers.forEach((name, values) -> {
             for (String value : values) {
                 builder.add(name, value);
             }
-        };
-        if (globalHeaders != null) {
-            globalHeaders.forEach(consumer);
-        }
-        this.headers.forEach(consumer);
+        });
         return builder.build();
     }
 

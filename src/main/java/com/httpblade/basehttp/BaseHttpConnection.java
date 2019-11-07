@@ -46,7 +46,6 @@ class BaseHttpConnection {
     private Form form;
     private Body body;
     private Charset charset;
-    private Headers globalHeaders;
 
     BaseHttpConnection setUrl(HttpUrl url) {
         this.httpUrl = url;
@@ -113,11 +112,6 @@ class BaseHttpConnection {
         return this;
     }
 
-    BaseHttpConnection setGlobalHeaders(Headers globalHeaders) {
-        this.globalHeaders = globalHeaders;
-        return this;
-    }
-
     HttpURLConnection getConnection() {
         return this.conn;
     }
@@ -152,7 +146,7 @@ class BaseHttpConnection {
             case HttpStatus.MOVED_PERM:
             case HttpStatus.MOVED_TEMP:
             case HttpStatus.SEE_OTHER:
-                if(maxRedirectCount < 1 || redirectCount > maxRedirectCount) {
+                if (maxRedirectCount < 1 || redirectCount > maxRedirectCount) {
                     return new BaseHttpResponseImpl(this);
                 } else {
                     return innerExecute(++redirectCount);
@@ -177,7 +171,7 @@ class BaseHttpConnection {
         conn.setConnectTimeout(connectTimeout);
         conn.setReadTimeout(readTimeout);
         configHttps(conn, this.hostnameVerifier, this.ssf);
-        addHeaders(conn, globalHeaders, headers);
+        addHeaders(conn, headers);
         addCookie(conn, this.url, this.cookieHome);
     }
 
@@ -213,7 +207,7 @@ class BaseHttpConnection {
         throw new HttpBladeException("the url protocol must be http or https");
     }
 
-    private static void addHeaders(HttpURLConnection conn, Headers globalHeaders, Headers headers) {
+    private static void addHeaders(HttpURLConnection conn, Headers headers) {
         BiConsumer<String, List<String>> consumer = (name, values) -> {
             if (values.size() == 1) {
                 conn.setRequestProperty(name, values.get(0));
@@ -223,9 +217,6 @@ class BaseHttpConnection {
                 }
             }
         };
-        if (globalHeaders != null) {
-            globalHeaders.forEach(consumer);
-        }
         if (headers != null) {
             headers.forEach(consumer);
         }

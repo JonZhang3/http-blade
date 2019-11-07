@@ -6,20 +6,17 @@ import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.HttpUrl;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
-    private String url;
     private HttpUrl httpUrl;
     private HttpMethod method;
 
     @Override
     public BaseHttpRequestImpl url(String url) {
-        this.url = url;
         this.httpUrl = new HttpUrl(url);
         return this;
     }
@@ -97,7 +94,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
             .setUrl(httpUrl)
             .setMethod(getMethod())
             .setProxy(client.javaProxy())
-            .setHeaders(headers)
+            .setHeaders(headers.merge(client.globalHeaders()))
             .setConnectTimeout((int) client.connectTimeout())
             .setReadTimeout((int) client.readTimeout())
             .setHostnameVerifier(client.hostnameVerifier())
@@ -106,8 +103,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
             .setForm(form)
             .setBody(body)
             .setCharset(charset)
-            .setMaxRedirectCount(client.maxRedirectCount())
-            .setGlobalHeaders(client.globalHeaders());
+            .setMaxRedirectCount(client.maxRedirectCount());
     }
 
 }

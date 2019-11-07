@@ -50,18 +50,24 @@ public final class Body {
         if (data == null) {
             return null;
         }
-        if (contentType == null && isString()) {
-            contentType = ContentType.guessContentType(getStringData());
-            if (contentType == null) {
-                contentType = "";
-            }
+        if (contentType != null) {
+            this.contentType = contentType;
         }
-        this.contentType = contentType;
         if (isBytes()) {
-            return RequestBody.create(MediaType.parse(contentType), getBytesData());
+            if (this.contentType == null) {
+                this.contentType = ContentType.OCTET_STREAM;
+            }
+            return RequestBody.create(MediaType.parse(this.contentType), getBytesData());
         } else if (isString()) {
-            return RequestBody.create(MediaType.parse(ContentType.addCharset(contentType, charset)), getStringData());
+            String data = getStringData();
+            if (this.contentType == null) {
+                this.contentType = ContentType.guessContentType(data);
+            }
+            return RequestBody.create(MediaType.parse(ContentType.addCharset(this.contentType, charset)), data);
         } else if (isStream()) {
+            if (this.contentType == null) {
+                this.contentType = ContentType.OCTET_STREAM;
+            }
             return new StreamRequestBody(getStreamData());
         }
         return null;
@@ -71,20 +77,26 @@ public final class Body {
         if (data == null) {
             return null;
         }
-        if (contentType == null && isString()) {
-            contentType = ContentType.guessContentType(getStringData());
-            if (contentType == null) {
-                contentType = "";
-            }
+        if (contentType != null) {
+            this.contentType = contentType;
         }
-        this.contentType = contentType;
         if (isBytes()) {
-            return new ByteArrayEntity(getBytesData(), org.apache.http.entity.ContentType.parse(contentType));
+            if (this.contentType == null) {
+                this.contentType = ContentType.OCTET_STREAM;
+            }
+            return new ByteArrayEntity(getBytesData(), org.apache.http.entity.ContentType.parse(this.contentType));
         } else if (isString()) {
-            return new StringEntity(getStringData(),
-                org.apache.http.entity.ContentType.parse(ContentType.addCharset(contentType, charset)));
+            String data = getStringData();
+            if (this.contentType == null) {
+                this.contentType = ContentType.guessContentType(data);
+            }
+            return new StringEntity(data,
+                org.apache.http.entity.ContentType.parse(ContentType.addCharset(this.contentType, charset)));
         } else if (isStream()) {
-            return new InputStreamEntity(getStreamData(), org.apache.http.entity.ContentType.parse(contentType));
+            if (this.contentType == null) {
+                this.contentType = ContentType.OCTET_STREAM;
+            }
+            return new InputStreamEntity(getStreamData(), org.apache.http.entity.ContentType.parse(this.contentType));
         }
         return null;
     }
@@ -93,18 +105,24 @@ public final class Body {
         if (data == null) {
             return;
         }
-        if (contentType == null && isString()) {
-            contentType = ContentType.guessContentType(getStringData());
-            if (contentType == null) {
-                contentType = "";
-            }
+        if (contentType != null) {
+            this.contentType = contentType;
         }
-        this.contentType = contentType;
         if (isString()) {
+            String data = getStringData();
+            if (this.contentType == null) {
+                this.contentType = ContentType.guessContentType(data);
+            }
             out.write(getStringData().getBytes(charset));
         } else if (isBytes()) {
+            if (this.contentType == null) {
+                this.contentType = ContentType.OCTET_STREAM;
+            }
             out.write(getBytesData());
         } else {
+            if (this.contentType == null) {
+                this.contentType = ContentType.OCTET_STREAM;
+            }
             Utils.copy(getStreamData(), out);
         }
     }
@@ -118,7 +136,7 @@ public final class Body {
     }
 
     private InputStream getStreamData() {
-        return isStream() ? (InputStream) data : null;
+        return (InputStream) data;
     }
 
     private byte[] getBytesData(Charset charset) {

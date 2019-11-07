@@ -4,11 +4,20 @@ import com.httpblade.base.HttpClient;
 import com.httpblade.base.HttpClientBuilder;
 import com.httpblade.base.Request;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.api.ApiMethod;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class HttpBlade {
 
     private static JsonParserFactory jsonParserFactory;
     private static XmlParserFactory xmlParserFactory;
+
+    private static final Map<Method, ApiMethod> apiMethods = new ConcurrentHashMap<>();
 
     /**
      * JDK 自带客户端类型
@@ -114,8 +123,32 @@ public final class HttpBlade {
         return new RequestWrapper(defaultClient(), createRequest(), url, HttpMethod.PATCH);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> serviceClass) {
-        return null;
+        return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class[]{serviceClass},
+            new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    if (method.getDeclaringClass() == Object.class) {
+                        return method.invoke(this, args);
+                    }
+                    if (method.isDefault()) {
+                        method.invoke(proxy, args);
+                    }
+                    ApiMethod apiMethod = apiMethods.get(method);
+                    if (apiMethod != null) {
+                        return apiMethod.execute(args);
+                    }
+                    synchronized (apiMethods) {
+                        apiMethod = apiMethods.get(method);
+                        if (apiMethod == null) {
+                            apiMethod = new ApiMethod(method);
+                            apiMethods.put(method, apiMethod);
+                        }
+                    }
+                    return apiMethod.execute(args);
+                }
+            });
     }
 
 }
