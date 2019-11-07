@@ -94,7 +94,6 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
             throw new HttpBladeException("must specify a http method");
         }
         return new BaseHttpConnection()
-            .setUrl(getUrl())
             .setUrl(httpUrl)
             .setMethod(getMethod())
             .setProxy(client.javaProxy())

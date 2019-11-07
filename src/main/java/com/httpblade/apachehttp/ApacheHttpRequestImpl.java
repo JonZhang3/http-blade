@@ -8,15 +8,23 @@ import com.httpblade.common.ContentType;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.HttpUrl;
 import com.httpblade.common.form.Field;
+import com.httpblade.common.form.Form;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.HeaderGroup;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,53 +32,65 @@ import java.util.Map;
 
 public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl> {
 
-    private HttpRequestImpl request;
     private HttpMethod method;
+    private String url;
+    private HeaderGroup headerGroup = new HeaderGroup();
 
     public ApacheHttpRequestImpl() {
-        request = new HttpRequestImpl();
+
     }
 
     @Override
     public ApacheHttpRequestImpl url(String url) {
-        request.setURI(URI.create(url));
+        if(url == null) {
+            throw new HttpBladeException("the url is null");
+        }
+        this.url = url;
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl method(HttpMethod method) {
         this.method = method;
-        request.setMethod(method);
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl setHeader(String name, String value) {
-        request.setHeader(name, value);
+        this.headerGroup.updateHeader(new BasicHeader(name, value));
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl addHeader(String name, String value) {
-        request.addHeader(name, value);
+        this.headerGroup.addHeader(new BasicHeader(name, value));
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl removeHeader(String name) {
-        request.removeHeaders(name);
+        if(name != null) {
+            HeaderIterator iterator = headerGroup.iterator();
+            while (iterator.hasNext()) {
+                Header header = iterator.nextHeader();
+                if(name.equalsIgnoreCase(header.getName())) {
+                    iterator.remove();
+                }
+            }
+        }
+
         return this;
     }
 
     @Override
     public boolean containsHeader(String name) {
-        return this.request.containsHeader(name);
+        return headerGroup.containsHeader(name);
     }
 
     @Override
     public String header(String name) {
-        Header header = request.getFirstHeader(name);
-        if (header != null) {
+        Header header = headerGroup.getFirstHeader(name);
+        if(header != null) {
             return header.getValue();
         }
         return null;
@@ -78,7 +98,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public List<String> headers(String name) {
-        HeaderIterator iterator = request.headerIterator(name);
+        HeaderIterator iterator = headerGroup.iterator(name);
         List<String> result = new ArrayList<>();
         while (iterator.hasNext()) {
             result.add(iterator.nextHeader().getValue());
@@ -88,7 +108,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public Map<String, List<String>> allHeaders() {
-        Header[] allHeaders = request.getAllHeaders();
+        Header[] allHeaders = headerGroup.getAllHeaders();
         Headers headers = new Headers();
         if (allHeaders != null) {
             for (Header header : allHeaders) {
@@ -100,13 +120,14 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public ApacheHttpRequestImpl pathVariable(String name, String value) {
+        url = url.replaceAll("\\{ + name + \\}", value);
         return this;
     }
 
     @Override
     public URL getUrl() {
         try {
-            return request.getURI().toURL();
+            return new URL(url);
         } catch (MalformedURLException e) {
             throw new HttpBladeException(e);
         }
@@ -118,57 +139,78 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     }
 
     HttpUriRequest build(Headers globalHeaders, CookieHome cookieHome) {
-        RequestBuilder builder = RequestBuilder.copy(request);
-        setGlobalHeaders(builder, globalHeaders);
-        addCookie(builder, cookieHome);
-        String contentType = this.header(HttpHeader.CONTENT_TYPE);
-        if (body != null) {
-            builder.setEntity(this.body.createApacheHttpEntity(contentType, charset));
-            if (contentType == null) {
-                this.setHeader(HttpHeader.CONTENT_TYPE, body.getContentType());
+        HttpRequestBase request;
+        URI uri = URI.create(url);
+        HttpEntity entity = null;
+        if(!HttpMethod.requiresRequestBody(this.method)) {
+            URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
+            this.form.forEachFields(this.charset, (index, name, value) -> uriBuilder.addParameter(name, value));
+            try {
+                uri = uriBuilder.build();
+            } catch (URISyntaxException ignore) {
             }
+        } else if(body != null) {
+            entity = this.body.createApacheHttpEntity("", charset);
         } else {
-            if (builder.getMethod().equalsIgnoreCase(HttpMethod.GET.value()) || this.form.onlyNormalField()) {
-                for (Field field : form.fields()) {
-                    builder.addParameter(field.name(), field.value());
-                }
-                if (contentType == null) {
-                    this.setHeader(HttpHeader.CONTENT_TYPE, ContentType.FORM);
-                }
-            } else {
-                MultipartFormEntity multipartFormEntity = new MultipartFormEntity(form, charset);
-                if (contentType == null) {
-                    this.setHeader(HttpHeader.CONTENT_TYPE, form.contentType());
-                }
-                builder.setEntity(multipartFormEntity);
-            }
+            entity = new MultipartFormEntity(form, charset);
         }
-        return builder.build();
+        if(entity == null) {
+            request = new HttpRequestImpl(method.value());
+        } else {
+            request = new HttpEntityRequestImpl(method.value());
+            ((HttpEntityRequestImpl) request).setEntity(entity);
+        }
+        request.setURI(uri);
+        setGlobalHeaders(request, globalHeaders);
+        request.setHeaders(headerGroup.getAllHeaders());
+        addCookie(request, cookieHome);
+//        if (body != null) {
+//            builder.setEntity(this.body.createApacheHttpEntity(contentType, charset));
+//            if (contentType == null) {
+//                this.setHeader(HttpHeader.CONTENT_TYPE, body.getContentType());
+//            }
+//        } else {
+//            if (builder.getMethod().equalsIgnoreCase(HttpMethod.GET.value()) || this.form.onlyNormalField()) {
+//                for (Field field : form.fields()) {
+//                    builder.addParameter(field.name(), field.value());
+//                }
+//                if (contentType == null) {
+//                    this.setHeader(HttpHeader.CONTENT_TYPE, ContentType.FORM);
+//                }
+//            } else {
+//                MultipartFormEntity multipartFormEntity = new MultipartFormEntity(form, charset);
+//                if (contentType == null) {
+//                    this.setHeader(HttpHeader.CONTENT_TYPE, form.contentType());
+//                }
+//                builder.setEntity(multipartFormEntity);
+//            }
+//        }
+        return request;
     }
 
-    private static void setGlobalHeaders(RequestBuilder builder, Headers globalHeaders) {
+    private static void setGlobalHeaders(HttpRequestBase request, Headers globalHeaders) {
         if (globalHeaders != null) {
             globalHeaders.forEach((name, values) -> {
                 if (values.size() == 1) {
-                    builder.setHeader(name, values.get(0));
+                    request.setHeader(name, values.get(0));
                 } else {
                     for (String value : values) {
-                        builder.addHeader(name, value);
+                        request.addHeader(name, value);
                     }
                 }
             });
         }
     }
 
-    private static void addCookie(RequestBuilder builder, CookieHome cookieHome) {
+    private static void addCookie(HttpRequestBase request, CookieHome cookieHome) {
         if (cookieHome != null) {
             URL url = null;
             try {
-                url = builder.getUri().toURL();
+                url = request.getURI().toURL();
             } catch (MalformedURLException ignore) {
             }
             List<Cookie> cookies = cookieHome.load(url);
-            builder.setHeader(HttpHeader.COOKIE, Cookie.join(cookies));
+            request.setHeader(HttpHeader.COOKIE, Cookie.join(cookies));
         }
     }
 
@@ -176,12 +218,22 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
         private String method;
 
-        HttpRequestImpl() {
-
+        HttpRequestImpl(String method) {
+            this.method = method;
         }
 
-        void setMethod(HttpMethod method) {
-            this.method = method.value();
+        @Override
+        public String getMethod() {
+            return method;
+        }
+    }
+
+    private static class HttpEntityRequestImpl extends HttpEntityEnclosingRequestBase {
+
+        private String method;
+
+        HttpEntityRequestImpl(String method) {
+            this.method = method;
         }
 
         @Override

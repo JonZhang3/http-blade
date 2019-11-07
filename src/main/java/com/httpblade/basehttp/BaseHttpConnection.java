@@ -48,22 +48,8 @@ class BaseHttpConnection {
     private Charset charset;
     private Headers globalHeaders;
 
-    BaseHttpConnection setUrl(String url) {
-        try {
-            this.url = new URL(Utils.encodeBlank(url));
-        } catch (MalformedURLException e) {
-            throw new HttpBladeException(e);
-        }
-        return this;
-    }
-
     BaseHttpConnection setUrl(HttpUrl url) {
         this.httpUrl = url;
-        return this;
-    }
-
-    BaseHttpConnection setUrl(URL url) {
-        this.url = url;
         return this;
     }
 
