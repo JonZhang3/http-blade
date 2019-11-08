@@ -9,8 +9,10 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HeaderGroup {
+public @interface StaticField {
 
-    String[] value() default {};
+    String name();
+
+    String value();
 
 }
