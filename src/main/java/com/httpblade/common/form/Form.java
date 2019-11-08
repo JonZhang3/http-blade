@@ -12,7 +12,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class Form {
 
@@ -20,6 +19,7 @@ public class Form {
     private static final String TWO_DASHES = "--";
     private static final String BOUNDARY = "--------------------HttpBlade";
     private static final String BOUNDARY_END = String.format("--%s--\n", BOUNDARY);
+
     private static final String CONTENT_DISPOSITION_TEMPLATE =
         "Content-Disposition: form-data; name=\"%s\"" + CRLF + CRLF;
     private static final String CONTENT_DISPOSITION_FILE_TEMPLATE =
@@ -79,19 +79,19 @@ public class Form {
     }
 
     public boolean hasNormalField() {
-        return this.fields.size() > 0;
+        return !this.fields.isEmpty();
     }
 
     public boolean hasFileField() {
-        return this.fileFields.size() > 0;
+        return !this.fileFields.isEmpty();
     }
 
     public boolean hasStreamField() {
-        return this.streamFields.size() > 0;
+        return !this.streamFields.isEmpty();
     }
 
     public boolean onlyNormalField() {
-        return this.fileFields.size() == 0 && this.streamFields.size() == 0;
+        return this.fileFields.isEmpty() && this.streamFields.isEmpty();
     }
 
     public boolean isEmpty() {

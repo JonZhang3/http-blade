@@ -118,14 +118,14 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     }
 
     private Headers createHeaders(com.httpblade.common.Headers globalHeaders) {
-        Headers.Builder builder = new Headers.Builder();
+        final Headers.Builder headerBuilder = new Headers.Builder();
         this.headers.merge(globalHeaders);
         this.headers.forEach((name, values) -> {
             for (String value : values) {
-                builder.add(name, value);
+                headerBuilder.add(name, value);
             }
         });
-        return builder.build();
+        return headerBuilder.build();
     }
 
 }

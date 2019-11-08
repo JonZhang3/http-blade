@@ -46,7 +46,7 @@ public class OkHttpClientImpl implements HttpClient {
     }
 
     @Override
-    public com.httpblade.base.Response request(Request request) throws HttpBladeException {
+    public com.httpblade.base.Response request(Request request) {
         OkHttpRequestImpl requestImpl = (OkHttpRequestImpl) request;
         try {
             Response response = client.newCall(requestImpl.build(this.globalHeaders)).execute();

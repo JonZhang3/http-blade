@@ -123,8 +123,7 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
 
     @Override
     public OkHttpClientBuilderImpl proxy(String host, int port, String username, String password) {
-        Proxy proxy = new Proxy(host, port, username, password);
-        this.proxy = proxy;
+        this.proxy = new Proxy(host, port, username, password);
         builder.proxy(Proxy.toJavaProxy(proxy));
         builder.proxyAuthenticator(createAuthenticator(username, password));
         return this;

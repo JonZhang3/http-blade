@@ -2,8 +2,7 @@ package com.httpblade.apachehttp;
 
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.form.Form;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
+import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.message.BasicHeader;
 
 import java.io.ByteArrayInputStream;
@@ -13,7 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class MultipartFormEntity implements HttpEntity {
+public class MultipartFormEntity extends AbstractHttpEntity {
 
     private Form form;
     private Charset charset;
@@ -21,16 +20,14 @@ public class MultipartFormEntity implements HttpEntity {
     MultipartFormEntity(Form form, Charset charset) {
         this.form = form;
         this.charset = charset;
+        this.contentType = new BasicHeader(HttpHeader.CONTENT_TYPE, form.contentType());
+        this.contentEncoding = new BasicHeader(HttpHeader.CONTENT_ENCODING, charset.name());
+        this.chunked = false;
     }
 
     @Override
     public boolean isRepeatable() {
         return true;
-    }
-
-    @Override
-    public boolean isChunked() {
-        return false;
     }
 
     @Override
@@ -45,17 +42,7 @@ public class MultipartFormEntity implements HttpEntity {
     }
 
     @Override
-    public Header getContentType() {
-        return new BasicHeader(HttpHeader.CONTENT_TYPE, form.contentType());
-    }
-
-    @Override
-    public Header getContentEncoding() {
-        return null;
-    }
-
-    @Override
-    public InputStream getContent() throws IOException, UnsupportedOperationException {
+    public InputStream getContent() throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writeTo(baos);
         baos.flush();
@@ -72,8 +59,4 @@ public class MultipartFormEntity implements HttpEntity {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public void consumeContent() {
-    }
 }

@@ -6,11 +6,11 @@ public class Field {
     private String value;
     private boolean encoded;
 
-    public Field(String name, String value) {
+    Field(String name, String value) {
         this(name, value, false);
     }
 
-    public Field(String name, String value, boolean encoded) {
+    Field(String name, String value, boolean encoded) {
         this.name = name;
         this.value = value;
         this.encoded = encoded;

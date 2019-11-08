@@ -29,22 +29,22 @@ import java.util.zip.GZIPInputStream;
 
 public class BaseHttpResponseImpl implements Response {
 
-    private int status;
-    private InputStream in;
+    private int statusCode;
+    private InputStream inputStream;
     private Headers headers;
     private List<Cookie> cookies;
-    private BaseHttpConnection conn;
+    private BaseHttpConnection connection;
     private Charset charset;
 
     BaseHttpResponseImpl(BaseHttpConnection conn) throws IOException {
-        this.conn = conn;
+        this.connection = conn;
         init();
     }
 
     private void init() throws IOException {
-        HttpURLConnection conn = this.conn.getConnection();
-        CookieHome cookieHome = this.conn.getCookieHome();
-        URL url = this.conn.getUrl();
+        HttpURLConnection conn = this.connection.getConnection();
+        CookieHome cookieHome = this.connection.getCookieHome();
+        URL url = this.connection.getUrl();
         Map<String, List<String>> headerFields = conn.getHeaderFields();
         this.headers = new Headers(headerFields);
         List<Cookie> cookies = Cookie.parseAll(url, headerFields.get(HttpHeader.SET_COOKIE));
@@ -54,30 +54,30 @@ public class BaseHttpResponseImpl implements Response {
         }
 
         int status = conn.getResponseCode();
-        this.status = status;
+        this.statusCode = status;
         InputStream in = HttpStatus.isBad(status) ? conn.getErrorStream() : conn.getInputStream();
         if (in != null) {
             if (isGzip() && !(in instanceof GZIPInputStream)) {
                 try {
                     in = new GZIPInputStream(in);
                 } catch (IOException ignore) {
+                    // It shouldn't happen.
                 }
             } else if (isDeflate() && !(in instanceof DeflaterInputStream)) {
                 in = new DeflaterInputStream(in);
             }
         }
-        this.in = in;
-
+        this.inputStream = in;
     }
 
     @Override
     public int status() {
-        return status;
+        return statusCode;
     }
 
     @Override
     public boolean isOk() {
-        return HttpStatus.isOk(status);
+        return HttpStatus.isOk(statusCode);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class BaseHttpResponseImpl implements Response {
 
     @Override
     public InputStream stream() {
-        return this.in;
+        return this.inputStream;
     }
 
     @Override
@@ -139,11 +139,12 @@ public class BaseHttpResponseImpl implements Response {
     @Override
     public byte[] bytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Utils.copy(this.in, baos);
+        Utils.copy(this.inputStream, baos);
         byte[] bytes = baos.toByteArray();
         try {
             baos.close();
         } catch (IOException ignore) {
+            // It shouldn't happen.
         }
         return bytes;
     }
@@ -208,20 +209,20 @@ public class BaseHttpResponseImpl implements Response {
 
     @Override
     public Object raw() {
-        return conn.getConnection();
+        return connection.getConnection();
     }
 
     @Override
     public void close() {
-        if (in != null) {
+        if (inputStream != null) {
             try {
-                in.close();
+                inputStream.close();
             } catch (IOException e) {
                 throw new HttpBladeException(e);
             }
         }
-        if (conn != null) {
-            conn.close();
+        if (connection != null) {
+            connection.close();
         }
     }
 

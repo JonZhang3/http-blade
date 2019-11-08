@@ -146,7 +146,7 @@ public class Cookie {
                 } else if (name.equalsIgnoreCase("max-age")) {
                     maxAge = parseMaxAge(value);
                 } else if (name.equalsIgnoreCase("domain")) {
-                    domain = parseDomain(domain);
+                    domain = parseDomain(value);
                 } else if (name.equalsIgnoreCase("path")) {
                     path = value;
                 } else if (name.equalsIgnoreCase("secure")) {

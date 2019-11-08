@@ -20,7 +20,7 @@ public final class AsyncTaskExecutor {
 
     public AsyncTaskExecutor() {
         this.executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
-            new SynchronousQueue<>(), (r) -> new Thread(r, "HttpBlade Async Thread"));
+            new SynchronousQueue<>(), r -> new Thread(r, "HttpBlade Async Thread"));
     }
 
     public void enqueue(Task task) {

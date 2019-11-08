@@ -18,6 +18,9 @@ import java.lang.reflect.InvocationTargetException;
 
 final class Environment {
 
+    private Environment() {
+    }
+
     static final int CLIENT_TYPE_JDK = 0;
     static final int CLIENT_TYPE_OKHTTP = 1;
     static final int CLIENT_TYPE_APACHE_HTTP = 2;
@@ -25,9 +28,9 @@ final class Environment {
     static HttpClient defaultClient;
 
     static int nowUseClientType = CLIENT_TYPE_JDK;
-    private static Class<? extends Request> REQUEST_CLASS;
-    private static Class<? extends HttpClient> CLIENT_CLASS;
-    private static Class<? extends HttpClientBuilder> CLIENT_BUILDER_CLASS;
+    private static Class<? extends Request> requestClass;
+    private static Class<? extends HttpClient> clientClass;
+    private static Class<? extends HttpClientBuilder> clientBuilderClass;
 
     static {
         if (hasOkhttp()) {
@@ -41,31 +44,31 @@ final class Environment {
     }
 
     static void use(int type) {
-        if(type == HttpBlade.CLIENT_TYPE_JDK) {
+        if (type == HttpBlade.CLIENT_TYPE_JDK) {
             useJdkHttp();
-        } else if(type == HttpBlade.CLIENT_TYPE_OKHTTP) {
+        } else if (type == HttpBlade.CLIENT_TYPE_OKHTTP) {
             useOkhttp();
-        } else if(type == HttpBlade.CLIENT_TYPE_APACHE_HTTP) {
+        } else if (type == HttpBlade.CLIENT_TYPE_APACHE_HTTP) {
             useApacheHttp();
         }
         newDefaultClient();
     }
 
     static Class<? extends Request> getRequestClass() {
-        return REQUEST_CLASS;
+        return requestClass;
     }
 
     static Class<? extends HttpClient> getClientClass() {
-        return CLIENT_CLASS;
+        return clientClass;
     }
 
     static Class<? extends HttpClientBuilder> getClientBuilderClass() {
-        return CLIENT_BUILDER_CLASS;
+        return clientBuilderClass;
     }
 
     static Request newRequest() {
         try {
-            return REQUEST_CLASS.newInstance();
+            return requestClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new HttpBladeException(e);
         }
@@ -73,7 +76,7 @@ final class Environment {
 
     static HttpClientBuilder newClientBuilder() {
         try {
-            return CLIENT_BUILDER_CLASS.newInstance();
+            return clientBuilderClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new HttpBladeException(e);
         }
@@ -98,30 +101,30 @@ final class Environment {
     }
 
     private static void useOkhttp() {
-        REQUEST_CLASS = OkHttpRequestImpl.class;
-        CLIENT_CLASS = OkHttpClientImpl.class;
-        CLIENT_BUILDER_CLASS = OkHttpClientBuilderImpl.class;
+        requestClass = OkHttpRequestImpl.class;
+        clientClass = OkHttpClientImpl.class;
+        clientBuilderClass = OkHttpClientBuilderImpl.class;
         nowUseClientType = HttpBlade.CLIENT_TYPE_OKHTTP;
     }
 
     private static void useApacheHttp() {
-        REQUEST_CLASS = ApacheHttpRequestImpl.class;
-        CLIENT_CLASS = ApacheHttpClientImpl.class;
-        CLIENT_BUILDER_CLASS = ApacheHttpClientBuilderImpl.class;
+        requestClass = ApacheHttpRequestImpl.class;
+        clientClass = ApacheHttpClientImpl.class;
+        clientBuilderClass = ApacheHttpClientBuilderImpl.class;
         nowUseClientType = HttpBlade.CLIENT_TYPE_APACHE_HTTP;
     }
 
     private static void useJdkHttp() {
-        REQUEST_CLASS = BaseHttpRequestImpl.class;
-        CLIENT_CLASS = BaseHttpClientImpl.class;
-        CLIENT_BUILDER_CLASS = BaseHttpClientBuilderImpl.class;
+        requestClass = BaseHttpRequestImpl.class;
+        clientClass = BaseHttpClientImpl.class;
+        clientBuilderClass = BaseHttpClientBuilderImpl.class;
         nowUseClientType = HttpBlade.CLIENT_TYPE_JDK;
     }
 
     private static void newDefaultClient() {
         try {
             Constructor<? extends HttpClient> constructor =
-                CLIENT_CLASS.getDeclaredConstructor();
+                clientClass.getDeclaredConstructor();
             constructor.setAccessible(true);
             defaultClient = constructor.newInstance();
         } catch (InstantiationException | IllegalAccessException

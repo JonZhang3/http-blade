@@ -10,7 +10,6 @@ import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.HttpStatus;
 import com.httpblade.common.HttpUrl;
-import com.httpblade.common.Utils;
 import com.httpblade.common.form.Form;
 
 import javax.net.ssl.HostnameVerifier;
@@ -19,7 +18,6 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;

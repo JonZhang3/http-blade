@@ -55,7 +55,7 @@ public final class ApacheHttpResponseImpl implements Response {
                 }
             }
         }
-        if (cookieHome != null && cookies.size() > 0) {
+        if (cookieHome != null && !cookies.isEmpty()) {
             cookieHome.save(this.url, cookies);
         }
     }

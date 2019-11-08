@@ -26,15 +26,15 @@ public final class SSLSocketFactoryBuilder {
     /** SSL 协议 v1.0 版本 */
     public static final String PROTOCOL_SSL = "SSL";
     /** SSL 协议 v2.0 版本 */
-    public static final String PROTOCOL_SSLv2 = "SSLv2";
+    public static final String PROTOCOL_SSLV2 = "SSLv2";
     /** SSL 协议 v3.0 版本 */
-    public static final String PROTOCOL_SSLv3 = "SSLv3";
+    public static final String PROTOCOL_SSLV3 = "SSLv3";
     /** TLS 协议 v1.0，即 SSL 协议 v3.1 版本，被广泛使用 */
     public static final String PROTOCOL_TLS = "TLS";
     /** TLS 协议 v1.1 版本，即 SSL 协议 v3.2 版本 */
-    public static final String PROTOCOL_TLSv11 = "TLSv1.1";
+    public static final String PROTOCOL_TLSV11 = "TLSv1.1";
     /** TLS 协议 v1.2 版本，即 SSL 协议 v3.3 版本 */
-    public static final String PROTOCOL_TLSv12 = "TLSv1.2";
+    public static final String PROTOCOL_TLSV12 = "TLSv1.2";
 
     public static final String KEY_STORE_TYPE_JKS = "JKS";
     public static final String KEY_STORE_TYPE_PKCS8 = "PKCS8";

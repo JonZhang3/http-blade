@@ -15,8 +15,8 @@ public final class ContentType {
     public static final String MULTIPART = "multipart/form-data";
     public static final String OCTET_STREAM = "application/octet-stream";
 
+    private String raw;
     private String type;
-    private String contentType;
     private String charset;
 
     public static ContentType parse(String contentType) {
@@ -26,14 +26,14 @@ public final class ContentType {
         ContentType content = new ContentType();
         String[] splitStrs = contentType.split(";");
         String charset = null;
-        content.type = contentType;
+        content.raw = contentType;
         if(splitStrs.length == 1) {
-            content.contentType = splitStrs[0].toLowerCase(Locale.US);
+            content.type = splitStrs[0].toLowerCase(Locale.US);
         } else if(splitStrs.length >= 2) {
             if(Utils.isEmpty(splitStrs[0])) {
                 throw new HttpBladeException("No subtype found for: \"" + contentType + '"');
             }
-            content.contentType = splitStrs[0];
+            content.type = splitStrs[0];
             String parameter;
             for(int i = 1, len = splitStrs.length; i < len; i++) {
                 parameter = splitStrs[i].trim();
@@ -52,8 +52,12 @@ public final class ContentType {
         return content;
     }
 
+    public String getMediaType() {
+        return type;
+    }
+
     public String getContentType() {
-        return contentType;
+        return raw;
     }
 
     public String getCharset() {
@@ -62,7 +66,7 @@ public final class ContentType {
 
     @Override
     public String toString() {
-        String result = contentType;
+        String result = type;
         if(Utils.isNotEmpty(charset)) {
             result += "; charset=" + charset;
         }

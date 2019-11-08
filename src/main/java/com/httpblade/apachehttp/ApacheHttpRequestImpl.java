@@ -29,10 +29,6 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     private String url;
     private HttpEntityRequestImpl request = new HttpEntityRequestImpl();
 
-    public ApacheHttpRequestImpl() {
-
-    }
-
     @Override
     public ApacheHttpRequestImpl url(String url) {
         if (url == null) {
@@ -142,6 +138,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
             try {
                 uri = uriBuilder.build();
             } catch (URISyntaxException ignore) {
+                // It shouldn't happen.
             }
         } else if (body != null) {
             entity = this.body.createApacheHttpEntity(contentType, charset);
@@ -181,6 +178,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
             try {
                 url = request.getURI().toURL();
             } catch (MalformedURLException ignore) {
+                // It shouldn't happen.
             }
             List<Cookie> cookies = cookieHome.load(url);
             request.setHeader(HttpHeader.COOKIE, Cookie.join(cookies));

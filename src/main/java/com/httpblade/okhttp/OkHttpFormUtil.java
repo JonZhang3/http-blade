@@ -13,11 +13,14 @@ import okhttp3.RequestBody;
 
 import java.util.List;
 
-class OkHttpFormUtil {
+final class OkHttpFormUtil {
+
+    private OkHttpFormUtil() {
+    }
 
     static void createGetUrl(Form form, HttpUrl.Builder urlBuilder) {
         List<Field> fields = form.fields();
-        if (fields.size() > 0) {
+        if (!fields.isEmpty()) {
             for (Field field : fields) {
                 if (field.encoded()) {
                     urlBuilder.addEncodedQueryParameter(field.name(), field.value());
@@ -32,7 +35,7 @@ class OkHttpFormUtil {
         List<FileField> fileFields = form.fileFields();
         List<StreamField> streamFields = form.streamFields();
         List<Field> fields = form.fields();
-        if (fileFields.size() > 0 || streamFields.size() > 0) {
+        if (!fileFields.isEmpty() || !streamFields.isEmpty()) {
             MultipartBody.Builder multipartBuilder = new MultipartBody.Builder(form.getBoundary());
             for (Field field : fields) {
                 multipartBuilder.addFormDataPart(field.name(), field.value());

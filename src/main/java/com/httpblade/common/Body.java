@@ -59,11 +59,11 @@ public final class Body {
             }
             return RequestBody.create(MediaType.parse(this.contentType), getBytesData());
         } else if (isString()) {
-            String data = getStringData();
+            String result = getStringData();
             if (this.contentType == null) {
-                this.contentType = ContentType.guessContentType(data);
+                this.contentType = ContentType.guessContentType(result);
             }
-            return RequestBody.create(MediaType.parse(ContentType.addCharset(this.contentType, charset)), data);
+            return RequestBody.create(MediaType.parse(ContentType.addCharset(this.contentType, charset)), result);
         } else if (isStream()) {
             if (this.contentType == null) {
                 this.contentType = ContentType.OCTET_STREAM;
@@ -86,11 +86,11 @@ public final class Body {
             }
             return new ByteArrayEntity(getBytesData(), org.apache.http.entity.ContentType.parse(this.contentType));
         } else if (isString()) {
-            String data = getStringData();
+            String result = getStringData();
             if (this.contentType == null) {
-                this.contentType = ContentType.guessContentType(data);
+                this.contentType = ContentType.guessContentType(result);
             }
-            return new StringEntity(data,
+            return new StringEntity(result,
                 org.apache.http.entity.ContentType.parse(ContentType.addCharset(this.contentType, charset)));
         } else if (isStream()) {
             if (this.contentType == null) {
@@ -109,9 +109,9 @@ public final class Body {
             this.contentType = contentType;
         }
         if (isString()) {
-            String data = getStringData();
+            String result = getStringData();
             if (this.contentType == null) {
-                this.contentType = ContentType.guessContentType(data);
+                this.contentType = ContentType.guessContentType(result);
             }
             out.write(getStringData().getBytes(charset));
         } else if (isBytes()) {

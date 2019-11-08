@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,12 +16,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.FileNameMap;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -38,29 +36,6 @@ public final class Utils {
         return !isEmpty(src);
     }
 
-    public static boolean isWhitespace(char ch) {
-        return ch == '\t' || ch == '\n' || ch == '\f' || ch == '\r' || ch == ' ';
-    }
-
-    public static String trimSubstring(String str, int start, int end) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = start; i < end; i++) {
-            char ch = str.charAt(i);
-            if (!isWhitespace(ch)) {
-                sb.append(ch);
-            }
-        }
-        return sb.toString();
-    }
-
-    public static int indexOf(String str, int start, int end, char ch) {
-        for (int i = start; i < end; i++) {
-            if (str.charAt(i) == ch) {
-                return i;
-            }
-        }
-        return end;
-    }
 
     public static String encode(final String value, final String charsetName) {
         if(value == null) {
@@ -100,10 +75,14 @@ public final class Utils {
         FileOutputStream fos = null;
         try {
             if (!parentFile.exists()) {
-                parentFile.mkdirs();
+                if(!parentFile.mkdirs()) {
+                    throw new IOException("error creat new dir");
+                }
             }
             if (!file.exists()) {
-                file.createNewFile();
+                if(!file.createNewFile()) {
+                    throw new IOException("error creat new file");
+                }
             }
             fos = new FileOutputStream(file);
             int len = 0;
@@ -218,7 +197,7 @@ public final class Utils {
                 }
             } else if (content instanceof File) {
                 File file = (File) content;
-                FileInputStream fis = new FileInputStream(file);
+                FileInputStream fis = fis = new FileInputStream(file);
 
             } else {
                 String str = content.toString();

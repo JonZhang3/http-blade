@@ -2,6 +2,9 @@ package com.httpblade.common;
 
 public final class HttpStatus {
 
+    private HttpStatus() {
+    }
+
     public static final int OK = 200;
     public static final int MULT_CHOICE = 300;
     public static final int MOVED_PERM = 301;

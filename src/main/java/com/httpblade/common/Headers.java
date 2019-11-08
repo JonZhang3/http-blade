@@ -2,6 +2,7 @@ package com.httpblade.common;
 
 import com.httpblade.HttpBlade;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,7 +56,7 @@ public final class Headers {
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             if (name.equalsIgnoreCase(entry.getKey())) {
                 List<String> values = entry.getValue();
-                if (values != null && values.size() > 0) {
+                if (values != null && !values.isEmpty()) {
                     return values.get(0);
                 }
             }
@@ -69,7 +70,7 @@ public final class Headers {
                 return entry.getValue();
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public Map<String, List<String>> get() {
