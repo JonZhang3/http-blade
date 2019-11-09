@@ -3,7 +3,9 @@ package com.httpblade.base;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 public interface Response {
 
@@ -17,7 +19,7 @@ public interface Response {
 
     String string();
 
-    <T> T json(Class<T> type);
+    <T> T json(Type type);
 
     <T> T xml(Class<T> type);
 
@@ -34,6 +36,8 @@ public interface Response {
     String header(String name, String defaultValue);
 
     List<String> headers(String name);
+
+    Map<String, List<String>> allHeaders();
 
     String contentType();
 

@@ -20,9 +20,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +106,7 @@ public class BaseHttpResponseImpl implements Response {
     }
 
     @Override
-    public <T> T json(Class<T> type) {
+    public <T> T json(Type type) {
         JsonParserFactory factory = HttpBlade.getJsonParserFactory();
         if (factory != null) {
             return factory.fromJson(string(), type);
@@ -177,6 +177,11 @@ public class BaseHttpResponseImpl implements Response {
     @Override
     public List<String> headers(String name) {
         return headers.getList(name);
+    }
+
+    @Override
+    public Map<String, List<String>> allHeaders() {
+        return headers.get();
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -18,7 +19,6 @@ public final class Headers {
     private Map<String, List<String>> headers = new HashMap<>();
 
     public Headers() {
-
     }
 
     public Headers(Map<String, List<String>> values) {
@@ -27,10 +27,8 @@ public final class Headers {
 
     public Headers add(String name, String value) {
         checkNameAndValue(name, value);
-        List<String> list = headers.get(name);
-        if (list == null) {
-            list = new LinkedList<>();
-        }
+        String lowerCaseName = name.toLowerCase(Locale.US);
+        List<String> list = headers.computeIfAbsent(lowerCaseName, k -> new LinkedList<>());
         list.add(value);
         return this;
     }
@@ -39,7 +37,8 @@ public final class Headers {
         checkNameAndValue(name, value);
         List<String> list = new LinkedList<>();
         list.add(value);
-        headers.put(name, list);
+        String lowerCaseName = name.toLowerCase(Locale.US);
+        headers.put(lowerCaseName, list);
         return this;
     }
 
@@ -48,29 +47,24 @@ public final class Headers {
     }
 
     public Headers remove(String name) {
-        headers.remove(name);
+        String lowerCaseName = name.toLowerCase(Locale.US);
+        headers.remove(lowerCaseName);
         return this;
     }
 
     public String get(String name) {
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            if (name.equalsIgnoreCase(entry.getKey())) {
-                List<String> values = entry.getValue();
-                if (values != null && !values.isEmpty()) {
-                    return values.get(0);
-                }
-            }
+        String lowerCaseName = name.toLowerCase(Locale.US);
+        List<String> values = headers.get(lowerCaseName);
+        if (values != null && !values.isEmpty()) {
+            return values.get(0);
         }
         return null;
     }
 
     public List<String> getList(String name) {
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            if (name.equalsIgnoreCase(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-        return Collections.emptyList();
+        String lowerCaseName = name.toLowerCase(Locale.US);
+        List<String> values = headers.get(lowerCaseName);
+        return values != null ? values : Collections.emptyList();
     }
 
     public Map<String, List<String>> get() {

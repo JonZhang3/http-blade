@@ -7,11 +7,13 @@ import com.httpblade.XmlParserFactory;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
+import com.httpblade.common.ContentType;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpStatus;
 import com.httpblade.common.Utils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
+import org.apache.http.HeaderIterator;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 
@@ -20,16 +22,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 public final class ApacheHttpResponseImpl implements Response {
 
     private CloseableHttpResponse response;
     private URL url;
     private List<Cookie> cookies = new LinkedList<>();
+    private String charset = StandardCharsets.UTF_8.name();
 
     ApacheHttpResponseImpl(CloseableHttpResponse response, URL url, CookieHome cookieHome) {
         this.response = response;
@@ -59,6 +68,10 @@ public final class ApacheHttpResponseImpl implements Response {
         if (cookieHome != null && !cookies.isEmpty()) {
             cookieHome.save(this.url, cookies);
         }
+        ContentType contentType = ContentType.parse(contentType());
+        if(contentType != null && contentType.getCharset() != null) {
+            this.charset = contentType.getCharset();
+        }
     }
 
     @Override
@@ -86,14 +99,14 @@ public final class ApacheHttpResponseImpl implements Response {
     @Override
     public String string() {
         try {
-            return EntityUtils.toString(response.getEntity(), "UTF-8");
+            return Utils.decode(EntityUtils.toString(response.getEntity(), charset), charset);
         } catch (IOException e) {
             throw new HttpBladeException(e);
         }
     }
 
     @Override
-    public <T> T json(Class<T> type) {
+    public <T> T json(Type type) {
         JsonParserFactory factory = HttpBlade.getJsonParserFactory();
         if (factory != null) {
             return factory.fromJson(string(), type);
@@ -179,17 +192,28 @@ public final class ApacheHttpResponseImpl implements Response {
     }
 
     @Override
+    public Map<String, List<String>> allHeaders() {
+        Map<String, List<String>> result = new HashMap<>();
+        HeaderIterator iterator = response.headerIterator();
+        while (iterator.hasNext()) {
+            Header header = iterator.nextHeader();
+            String name = header.getName().toLowerCase(Locale.US);
+            String value = header.getValue();
+            List<String> values = result.computeIfAbsent(name, k -> new LinkedList<>());
+            values.add(value);
+        }
+        return result;
+    }
+
+    @Override
     public String contentType() {
-        return header(HttpHeader.CONTENT_TYPE);
+        Header contentType = response.getEntity().getContentType();
+        return contentType.getValue();
     }
 
     @Override
     public long contentLength() {
-        String contentLength = header(HttpHeader.CONTENT_LENGTH);
-        if (Utils.isEmpty(contentLength)) {
-            return 0;
-        }
-        return Long.parseLong(contentLength);
+        return response.getEntity().getContentLength();
     }
 
     @Override
