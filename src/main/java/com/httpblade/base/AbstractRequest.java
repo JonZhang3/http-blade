@@ -127,7 +127,7 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
     }
 
     @Override
-    public T formEncoding(String name, String value) {
+    public T formEncoded(String name, String value) {
         form.add(name, value, true);
         return (T) this;
     }

@@ -7,6 +7,7 @@ import com.httpblade.XmlParserFactory;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
+import com.httpblade.common.ContentType;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpStatus;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -34,7 +36,7 @@ public class BaseHttpResponseImpl implements Response {
     private Headers headers;
     private List<Cookie> cookies;
     private BaseHttpConnection connection;
-    private Charset charset;
+    private String charset = StandardCharsets.UTF_8.name();
 
     BaseHttpResponseImpl(BaseHttpConnection conn) throws IOException {
         this.connection = conn;
@@ -68,6 +70,10 @@ public class BaseHttpResponseImpl implements Response {
             }
         }
         this.inputStream = in;
+        ContentType contentType = ContentType.parse(headers.get(HttpHeader.CONTENT_TYPE));
+        if (contentType != null && contentType.getCharset() != null) {
+            this.charset = contentType.getCharset();
+        }
     }
 
     @Override
@@ -92,10 +98,11 @@ public class BaseHttpResponseImpl implements Response {
 
     @Override
     public String string() {
-        if (charset == null) {
-            charset = StandardCharsets.UTF_8;
+        try {
+            return new String(bytes(), charset);
+        } catch (UnsupportedEncodingException e) {
+            throw new HttpBladeException(e);
         }
-        return new String(bytes(), charset);
     }
 
     @Override
@@ -123,7 +130,11 @@ public class BaseHttpResponseImpl implements Response {
 
     @Override
     public Reader reader() {
-        return new InputStreamReader(stream());
+        try {
+            return new InputStreamReader(stream(), charset);
+        } catch (UnsupportedEncodingException e) {
+            throw new HttpBladeException(e);
+        }
     }
 
     @Override

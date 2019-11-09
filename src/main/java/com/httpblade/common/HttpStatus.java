@@ -15,7 +15,7 @@ public final class HttpStatus {
     public static final int BAD_REQUEST = 400;
 
     public static boolean isOk(int status) {
-        return status >= OK && status < 300;
+        return status >= OK && status < MULT_CHOICE;
     }
 
     public static boolean isBad(int status) {

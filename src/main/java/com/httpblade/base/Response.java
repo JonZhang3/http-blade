@@ -1,7 +1,5 @@
 package com.httpblade.base;
 
-import com.httpblade.common.HttpStatus;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
@@ -52,9 +50,5 @@ public interface Response {
     Object raw();
 
     void close();
-
-    default boolean isOk(int code) {
-        return code >= HttpStatus.OK && code < 300;
-    }
 
 }

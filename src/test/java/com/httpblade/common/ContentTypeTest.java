@@ -9,7 +9,7 @@ public class ContentTypeTest {
     public void test() {
         ContentType contentType = ContentType.parse("application/json; charset=utf-8");
         assertNotNull(contentType);
-        assertEquals("application/json", contentType.getContentType());
+        assertEquals("application/json", contentType.getMediaType());
         assertEquals("utf-8", contentType.getCharset());
 
         contentType = ContentType.parse("");
@@ -23,7 +23,7 @@ public class ContentTypeTest {
 
         contentType = ContentType.parse("application/json; charset=utf-8;a=A;b=B");
         assertNotNull(contentType);
-        assertEquals("application/json", contentType.getContentType());
+        assertEquals("application/json", contentType.getMediaType());
         assertEquals("utf-8", contentType.getCharset());
     }
 

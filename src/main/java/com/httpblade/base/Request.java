@@ -76,7 +76,7 @@ public interface Request<T extends Request> {
 
     T form(String name, String value);
 
-    T formEncoding(String name, String value);
+    T formEncoded(String name, String value);
 
     T form(String name, String filePath, String fileName);
 

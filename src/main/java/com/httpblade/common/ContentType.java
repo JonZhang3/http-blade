@@ -24,9 +24,9 @@ public final class ContentType {
             return null;
         }
         ContentType content = new ContentType();
+        content.raw = contentType;
         String[] splitStrs = contentType.split(";");
         String charset = null;
-        content.raw = contentType;
         if(splitStrs.length == 1) {
             content.type = splitStrs[0].toLowerCase(Locale.US);
         } else if(splitStrs.length >= 2) {
@@ -56,7 +56,7 @@ public final class ContentType {
         return type;
     }
 
-    public String getContentType() {
+    public String raw() {
         return raw;
     }
 

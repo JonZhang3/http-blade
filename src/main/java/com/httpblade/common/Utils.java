@@ -3,17 +3,12 @@ package com.httpblade.common;
 import com.httpblade.HttpBladeException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.FileNameMap;
 import java.net.URLConnection;
@@ -36,9 +31,8 @@ public final class Utils {
         return !isEmpty(src);
     }
 
-
     public static String encode(final String value, final String charsetName) {
-        if(value == null) {
+        if (value == null) {
             return null;
         }
         try {
@@ -56,63 +50,34 @@ public final class Utils {
         }
     }
 
-    public static void close(Closeable... closeables) {
-        if (closeables != null) {
-            try {
-                for (Closeable closeable : closeables) {
-                    if (closeable != null) {
-                        closeable.close();
-                    }
-                }
-            } catch (IOException ignore) {
-            }
-        }
-    }
-
     public static File writeToFile(String path, InputStream in) throws IOException {
         File file = new File(path);
         File parentFile = file.getParentFile();
-        FileOutputStream fos = null;
-        try {
-            if (!parentFile.exists()) {
-                if(!parentFile.mkdirs()) {
-                    throw new IOException("error creat new dir");
-                }
-            }
-            if (!file.exists()) {
-                if(!file.createNewFile()) {
-                    throw new IOException("error creat new file");
-                }
-            }
-            fos = new FileOutputStream(file);
-            int len = 0;
+        if (!parentFile.exists() && !parentFile.mkdirs()) {
+            throw new IOException("error creat new dir");
+        }
+        if (!file.exists() && !file.createNewFile()) {
+            throw new IOException("error creat new file");
+        }
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            int len;
             byte[] buffer = new byte[1024];
             while ((len = in.read(buffer)) != -1) {
                 fos.write(buffer, 0, len);
             }
             fos.flush();
             return file;
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            close(fos);
         }
     }
 
     public static byte[] toBytes(InputStream in) throws IOException {
-        ByteArrayOutputStream baos = null;
-        try {
-            baos = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             int len = 0;
             while ((len = in.read(buffer)) != -1) {
                 baos.write(buffer, 0, len);
             }
             return baos.toByteArray();
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            close(baos, in);
         }
     }
 
@@ -153,19 +118,10 @@ public final class Utils {
     }
 
     public static void copy(File file, OutputStream out) {
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
+        try (FileInputStream fis = new FileInputStream(file)) {
             copy(fis, out);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new HttpBladeException(e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ignore) {
-                }
-            }
         }
     }
 
@@ -183,34 +139,26 @@ public final class Utils {
     }
 
     public static void write(OutputStream out, Charset charset, Object content) {
-        OutputStreamWriter osw;
-        InputStreamReader isr = null;
+        InputStream in = null;
         try {
-            osw = charset == null ? new OutputStreamWriter(out) : new OutputStreamWriter(out, charset);
             if (content instanceof InputStream) {
-                InputStream in = (InputStream) content;
-                isr = charset == null ? new InputStreamReader(in) : new InputStreamReader(in, charset);
-                int len;
-                char[] buffer = new char[2 * 1024];
-                while ((len = isr.read(buffer)) != -1) {
-                    osw.write(buffer, 0, len);
-                }
+                in = (InputStream) content;
+                copy(in, out);
             } else if (content instanceof File) {
-                File file = (File) content;
-                FileInputStream fis = fis = new FileInputStream(file);
-
+                copy((File) content, out);
             } else {
                 String str = content.toString();
-                osw.write(str);
+                out.write(str.getBytes(charset));
             }
-            osw.flush();
+            out.flush();
         } catch (IOException e) {
             throw new HttpBladeException(e);
         } finally {
-            if (isr != null) {
+            if (in != null) {
                 try {
-                    isr.close();
+                    in.close();
                 } catch (IOException ignore) {
+                    // It shouldn't happen.
                 }
             }
         }

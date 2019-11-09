@@ -77,7 +77,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     @Override
     public OkHttpRequestImpl pathVariable(String name, String value) {
         if (path != null) {
-            path = path.replaceAll("\\{ + name + \\}", value);
+            path = path.replaceAll("%7B" + name + "%7D", value);
         }
         return this;
     }
@@ -97,7 +97,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             throw new HttpBladeException("must specify a http method");
         }
         HttpUrl.Builder urlBuilder = this.url.newBuilder();
-        urlBuilder.addEncodedPathSegment(path);
+        urlBuilder.encodedPath(path);
         if (HttpMethod.requiresRequestBody(method)) {
             if (body != null) {
                 builder.method(method.value(), body.createOkhttpRequestBody(header(HttpHeader.CONTENT_TYPE),
@@ -109,7 +109,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             }
         } else {
             OkHttpFormUtil.createGetUrl(form, urlBuilder);
-            builder.get();
+            builder.method(method.value(), null);
         }
         setBasicAuth();
         builder.headers(createHeaders(globalHeaders));

@@ -15,17 +15,17 @@ import java.util.List;
 
 public class Form {
 
-    private static final String CRLF = "\r\n";
+    private static final String CRLF = "\r%n";
     private static final String TWO_DASHES = "--";
     private static final String BOUNDARY = "--------------------HttpBlade";
-    private static final String BOUNDARY_END = String.format("--%s--\n", BOUNDARY);
+    private static final String BOUNDARY_END = String.format("--%s--%n", BOUNDARY);
 
     private static final String CONTENT_DISPOSITION_TEMPLATE =
         "Content-Disposition: form-data; name=\"%s\"" + CRLF + CRLF;
     private static final String CONTENT_DISPOSITION_FILE_TEMPLATE =
         "Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"" + CRLF;
     private static final String CONTENT_TYPE_MULTIPART_PREFIX = "multipart/form-data; boundary=";
-    private static final String CONTENT_TYPE_FILE_TEMPLATE = "Content-Type: %s\r\n\r\n";
+    private static final String CONTENT_TYPE_FILE_TEMPLATE = "Content-Type: %s\r%n\r%n";
 
     private List<Field> fields = new LinkedList<>();
     private List<FileField> fileFields = new LinkedList<>();

@@ -89,7 +89,7 @@ final class RequestWrapper {
     }
 
     public RequestWrapper formEncoding(String name, String value) {
-        request.formEncoding(name, value);
+        request.formEncoded(name, value);
         return this;
     }
 

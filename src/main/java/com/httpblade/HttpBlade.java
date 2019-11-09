@@ -1,8 +1,10 @@
 package com.httpblade;
 
+import com.httpblade.base.Callback;
 import com.httpblade.base.HttpClient;
 import com.httpblade.base.HttpClientBuilder;
 import com.httpblade.base.Request;
+import com.httpblade.base.Response;
 import com.httpblade.common.HttpMethod;
 
 public final class HttpBlade {
@@ -79,6 +81,14 @@ public final class HttpBlade {
 
     public static void setXmlParserFactory(XmlParserFactory xmlParserFactory) {
         HttpBlade.xmlParserFactory = xmlParserFactory;
+    }
+
+    public static Response request(Request request) {
+        return defaultClient().request(request);
+    }
+
+    public static void requestAsync(Request request, Callback callback) {
+        defaultClient().requestAsync(request, callback);
     }
 
     public static RequestWrapper get(String url) {

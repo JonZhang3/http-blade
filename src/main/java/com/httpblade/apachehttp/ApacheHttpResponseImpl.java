@@ -8,6 +8,7 @@ import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
 import com.httpblade.common.HttpHeader;
+import com.httpblade.common.HttpStatus;
 import com.httpblade.common.Utils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -67,7 +68,7 @@ public final class ApacheHttpResponseImpl implements Response {
 
     @Override
     public boolean isOk() {
-        return isOk(status());
+        return HttpStatus.isOk(status());
     }
 
     @Override
