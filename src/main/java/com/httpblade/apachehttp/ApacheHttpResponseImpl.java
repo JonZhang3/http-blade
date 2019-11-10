@@ -24,14 +24,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 public final class ApacheHttpResponseImpl implements Response {
 
@@ -69,7 +67,7 @@ public final class ApacheHttpResponseImpl implements Response {
             cookieHome.save(this.url, cookies);
         }
         ContentType contentType = ContentType.parse(contentType());
-        if(contentType != null && contentType.getCharset() != null) {
+        if (contentType != null && contentType.getCharset() != null) {
             this.charset = contentType.getCharset();
         }
     }
@@ -207,13 +205,20 @@ public final class ApacheHttpResponseImpl implements Response {
 
     @Override
     public String contentType() {
-        Header contentType = response.getEntity().getContentType();
-        return contentType.getValue();
+        return this.header(HttpHeader.CONTENT_TYPE);
     }
 
     @Override
     public long contentLength() {
-        return response.getEntity().getContentLength();
+        String length = this.header(HttpHeader.CONTENT_LENGTH);
+        if (length != null) {
+            try {
+                return Long.parseLong(length);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
     @Override

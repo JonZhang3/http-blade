@@ -108,8 +108,9 @@ public class BaseHttpResponseImpl implements Response {
     @Override
     public <T> T json(Type type) {
         JsonParserFactory factory = HttpBlade.getJsonParserFactory();
+        String result = string();
         if (factory != null) {
-            return factory.fromJson(string(), type);
+            return factory.fromJson(result, type);
         }
         throw new HttpBladeException("you must specify a JsonParserFactory");
     }

@@ -182,8 +182,10 @@ class BaseHttpConnection {
             OutputStream out = conn.getOutputStream();
             if (body != null) {
                 body.writeTo(contentType, out, charset);
+                conn.setRequestProperty(HttpHeader.CONTENT_TYPE, body.getContentType());
             } else {
                 form.writeTo(out, charset);
+                conn.setRequestProperty(HttpHeader.CONTENT_TYPE, form.contentType());
             }
             out.flush();
             out.close();
