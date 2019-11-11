@@ -102,6 +102,11 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             if (body != null) {
                 builder.method(method.value(), body.createOkhttpRequestBody(header(HttpHeader.CONTENT_TYPE),
                     this.charset));
+                if (form.onlyNormalField()) {
+                    OkHttpFormUtil.createGetUrl(form, urlBuilder);
+                } else {
+                    throw new HttpBladeException("You have provided the request body for the request.");
+                }
             } else {
                 RequestBody body = OkHttpFormUtil.createRequestBody(form);
                 builder.method(method.value(), body);

@@ -5,6 +5,7 @@ import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
 import com.httpblade.common.Body;
+import com.httpblade.common.ContentType;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
@@ -44,6 +45,7 @@ class BaseHttpConnection {
     private Form form;
     private Body body;
     private Charset charset;
+    private boolean requiresRequestBody = false;
 
     BaseHttpConnection setUrl(HttpUrl url) {
         this.httpUrl = url;
@@ -52,6 +54,7 @@ class BaseHttpConnection {
 
     BaseHttpConnection setMethod(HttpMethod method) {
         this.method = method;
+        this.requiresRequestBody = HttpMethod.requiresRequestBody(method);
         return this;
     }
 
@@ -123,8 +126,18 @@ class BaseHttpConnection {
     }
 
     Response execute() throws IOException {
-        if (!HttpMethod.requiresRequestBody(method)) {
+        String contentType = this.headers.get(HttpHeader.CONTENT_TYPE);
+        if (!requiresRequestBody) {
             form.forEachFields(charset, (index, name, value) -> httpUrl.addQuery(name, value));
+        } else if (body != null) {
+            if (form.onlyNormalField()) {
+                form.forEachFields(charset, (index, name, value) -> httpUrl.addQuery(name, value));
+            } else {
+                throw new HttpBladeException("You have provided the request body for the request.");
+            }
+            this.headers.set(HttpHeader.CONTENT_TYPE, getContentType(body, contentType));
+        } else {
+            this.headers.set(HttpHeader.CONTENT_TYPE, form.contentType());
         }
         this.url = httpUrl.toURL();
         return innerExecute(1);
@@ -164,8 +177,10 @@ class BaseHttpConnection {
         conn.setRequestMethod(method.value());
         conn.setInstanceFollowRedirects(this.maxRedirectCount >= 1);
         conn.setDoInput(true);
-        conn.setDoOutput(true);
-        conn.setUseCaches(false);
+        if (requiresRequestBody) {
+            conn.setDoOutput(true);
+            conn.setUseCaches(false);
+        }
         conn.setConnectTimeout(connectTimeout);
         conn.setReadTimeout(readTimeout);
         configHttps(conn, this.hostnameVerifier, this.ssf);
@@ -177,20 +192,18 @@ class BaseHttpConnection {
         if (conn == null) {
             throw new NullPointerException("the http connection is null");
         }
-        String contentType = conn.getRequestProperty(HttpHeader.CONTENT_TYPE);
         if (HttpMethod.requiresRequestBody(method)) {
             OutputStream out = conn.getOutputStream();
             if (body != null) {
-                body.writeTo(contentType, out, charset);
-                conn.setRequestProperty(HttpHeader.CONTENT_TYPE, body.getContentType());
+                body.writeTo(out, charset);
             } else {
                 form.writeTo(out, charset);
-                conn.setRequestProperty(HttpHeader.CONTENT_TYPE, form.contentType());
             }
             out.flush();
-            out.close();
+            //out.close();
+        } else {
+            conn.connect();
         }
-        conn.connect();
     }
 
     void close() {
@@ -251,6 +264,18 @@ class BaseHttpConnection {
                 conn.setRequestProperty(HttpHeader.COOKIE, sb.toString());
             }
         }
+    }
+
+    private static String getContentType(Body body, String contentType) {
+        String result = contentType;
+        if (result != null) {
+            if (body.isString()) {
+                result = ContentType.guessContentType(body.getStringData());
+            } else {
+                result = ContentType.OCTET_STREAM;
+            }
+        }
+        return result;
     }
 
 }

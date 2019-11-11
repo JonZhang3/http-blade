@@ -14,6 +14,7 @@ public final class ContentType {
     public static final String FORM = "application/x-www-form-urlencoded";
     public static final String MULTIPART = "multipart/form-data";
     public static final String OCTET_STREAM = "application/octet-stream";
+    public static final String DEFAULT = "HTTPBLADE_DEFAULT";
 
     private String raw;
     private String type;

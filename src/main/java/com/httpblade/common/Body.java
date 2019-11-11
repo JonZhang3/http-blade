@@ -101,33 +101,20 @@ public final class Body {
         return null;
     }
 
-    public void writeTo(String contentType, OutputStream out, Charset charset) throws IOException {
+    public void writeTo(OutputStream out, Charset charset) throws IOException {
         if (data == null) {
             return;
         }
-        if (contentType != null) {
-            this.contentType = contentType;
-        }
         if (isString()) {
-            String result = getStringData();
-            if (this.contentType == null) {
-                this.contentType = ContentType.guessContentType(result);
-            }
             out.write(getStringData().getBytes(charset));
         } else if (isBytes()) {
-            if (this.contentType == null) {
-                this.contentType = ContentType.OCTET_STREAM;
-            }
             out.write(getBytesData());
         } else {
-            if (this.contentType == null) {
-                this.contentType = ContentType.OCTET_STREAM;
-            }
             Utils.copy(getStreamData(), out);
         }
     }
 
-    private String getStringData() {
+    public String getStringData() {
         return isString() ? (String) data : "";
     }
 

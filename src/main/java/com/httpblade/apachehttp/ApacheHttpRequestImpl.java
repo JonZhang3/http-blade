@@ -142,6 +142,17 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
             }
         } else if (body != null) {
             entity = this.body.createApacheHttpEntity(contentType, charset);
+            if (this.form.onlyNormalField()) {
+                URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
+                this.form.forEachFields(this.charset, (index, name, value) -> uriBuilder.addParameter(name, value));
+                try {
+                    uri = uriBuilder.build();
+                } catch (URISyntaxException ignore) {
+                    // It shouldn't happen.
+                }
+            } else {
+                throw new HttpBladeException("You have provided the request body for the request.");
+            }
         } else {
             entity = new MultipartFormEntity(form, charset);
         }
