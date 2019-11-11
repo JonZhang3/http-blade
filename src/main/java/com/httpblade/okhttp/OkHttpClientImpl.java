@@ -33,8 +33,6 @@ public class OkHttpClientImpl implements HttpClient {
             .maxRedirectCount(maxRedirectCount)
             .builder
             .build();
-        globalHeaders = new Headers();
-        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
         proxy = null;
     }
 

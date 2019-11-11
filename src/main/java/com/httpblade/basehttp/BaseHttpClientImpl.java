@@ -33,8 +33,6 @@ public class BaseHttpClientImpl implements HttpClient {
     private AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
 
     public BaseHttpClientImpl() {
-        globalHeaders = new Headers();
-        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     BaseHttpClientImpl(BaseHttpClientBuilderImpl clientBuilder) {

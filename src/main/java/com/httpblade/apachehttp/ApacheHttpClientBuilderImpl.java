@@ -5,7 +5,6 @@ import com.httpblade.base.HttpClient;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
-import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 import org.apache.http.client.config.RequestConfig;
@@ -43,7 +42,6 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClien
         requestConfigBuilder.setSocketTimeout(Defaults.READ_TIMEOUT);
         requestConfigBuilder.setRedirectsEnabled(true);
         requestConfigBuilder.setMaxRedirects(Defaults.MAX_REDIRECT_COUNT);
-        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     @Override

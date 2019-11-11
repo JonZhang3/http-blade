@@ -2,6 +2,7 @@ package com.httpblade.okhttp;
 
 import com.httpblade.HttpBladeException;
 import com.httpblade.base.AbstractRequest;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import okhttp3.Headers;
@@ -19,6 +20,10 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     private HttpUrl url;
     private String path;
     private HttpMethod method;
+
+    public OkHttpRequestImpl() {
+        Defaults.setDefaultHeaders(headers);
+    }
 
     @Override
     public OkHttpRequestImpl url(String url) {

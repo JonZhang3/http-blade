@@ -2,6 +2,7 @@ package com.httpblade.basehttp;
 
 import com.httpblade.HttpBladeException;
 import com.httpblade.base.AbstractRequest;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.HttpUrl;
@@ -14,6 +15,10 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     private HttpUrl httpUrl;
     private HttpMethod method;
+
+    public BaseHttpRequestImpl() {
+        Defaults.setDefaultHeaders(this.headers);
+    }
 
     @Override
     public BaseHttpRequestImpl url(String url) {

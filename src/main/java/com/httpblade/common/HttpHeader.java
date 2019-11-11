@@ -16,5 +16,7 @@ public final class HttpHeader {
     public static final String USER_AGENT = "User-Agent";
     public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
     public static final String CONNECTION = "Connection";// keep-alive or close
+    public static final String ACCEPT = "Accept";
+    public static final String ACCEPT_ENCODING = "Accept-Encoding";
 
 }

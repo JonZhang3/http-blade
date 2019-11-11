@@ -6,7 +6,6 @@ import com.httpblade.base.HttpClientBuilder;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
-import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 
@@ -28,7 +27,6 @@ public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClie
     SSLSocketFactory sslSocketFactory;
 
     public BaseHttpClientBuilderImpl() {
-        setDefaultHeader(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     @Override

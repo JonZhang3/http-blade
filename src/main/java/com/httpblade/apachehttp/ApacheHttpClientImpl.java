@@ -8,7 +8,6 @@ import com.httpblade.base.Request;
 import com.httpblade.base.Response;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
-import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.task.AsyncTaskExecutor;
 import com.httpblade.common.task.Task;
@@ -37,7 +36,7 @@ public class ApacheHttpClientImpl implements HttpClient {
     private final CloseableHttpClient client;
     private final RequestConfig requestConfig;
     private long writeTimeout = Defaults.WRITE_TIMEOUT;
-    private final Headers globalHeaders;
+    private Headers globalHeaders;
     private CookieHome cookieHome;
     private final HostnameVerifier hostnameVerifier;
     private final SSLSocketFactory sslSocketFactory;
@@ -55,8 +54,6 @@ public class ApacheHttpClientImpl implements HttpClient {
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.disableCookieManagement();
         client = clientBuilder.build();
-        globalHeaders = new Headers();
-        globalHeaders.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
         hostnameVerifier = null;
         sslSocketFactory = null;
         proxy = null;

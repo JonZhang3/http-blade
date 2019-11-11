@@ -39,7 +39,6 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
         builder.followRedirects(false);
         builder.followSslRedirects(false);
         maxRedirectCount(Defaults.MAX_REDIRECT_COUNT);
-        setDefaultHeader(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
     }
 
     @Override

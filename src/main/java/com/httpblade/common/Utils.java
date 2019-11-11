@@ -16,7 +16,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public final class Utils {
 
@@ -167,6 +173,52 @@ public final class Utils {
     public static String basicAuthString(String username, String password) {
         String usernameAndPassword = username + ":" + password;
         return "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static final TimeZone UTC = TimeZone.getTimeZone("GMT");
+
+    private static final ThreadLocal<SimpleDateFormat> HTTP_DATE_FORMATER = ThreadLocal.withInitial(() -> {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        sdf.setLenient(false);
+        sdf.setTimeZone(UTC);
+        return sdf;
+    });
+
+    // 参考 OkHttp
+    private static final String[] HTTP_DATE_FORMAT_STRING = new String[] {
+        "EEE, dd MMM yyyy HH:mm:ss zzz",
+        "EEEE, dd-MMM-yy HH:mm:ss zzz",
+        "EEE MMM d HH:mm:ss yyyy",
+        "EEE, dd-MMM-yyyy HH:mm:ss z",
+        "EEE, dd-MMM-yyyy HH-mm-ss z",
+        "EEE, dd MMM yy HH:mm:ss z",
+        "EEE dd-MMM-yyyy HH:mm:ss z",
+        "EEE dd MMM yyyy HH:mm:ss z",
+        "EEE dd-MMM-yyyy HH-mm-ss z",
+        "EEE dd-MMM-yy HH:mm:ss z",
+        "EEE dd MMM yy HH:mm:ss z",
+        "EEE,dd-MMM-yy HH:mm:ss z",
+        "EEE,dd-MMM-yyyy HH:mm:ss z",
+        "EEE, dd-MM-yyyy HH:mm:ss z",
+        "EEE MMM d yyyy HH:mm:ss z",
+    };
+
+    // @see okhttp3.internal.http.HttpDate
+    public static Date parseHttpDate(String formatDate) {
+        if(isEmpty(formatDate)) {
+            return null;
+        }
+        ParsePosition position = new ParsePosition(0);
+        Date date = HTTP_DATE_FORMATER.get().parse(formatDate, position);
+        if(position.getIndex() == formatDate.length()) {
+            return date;
+        }
+
+        return null;
+    }
+
+    public static String formatHttpDate(Date date) {
+        return HTTP_DATE_FORMATER.get().format(date);
     }
 
 }

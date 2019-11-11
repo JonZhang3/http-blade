@@ -1,5 +1,7 @@
 package com.httpblade.common;
 
+import org.apache.http.client.methods.HttpRequestBase;
+
 public interface Defaults {
 
     /**
@@ -26,5 +28,17 @@ public interface Defaults {
      * 默认 User-Agent 请求头的值
      */
     String USER_AGENT_STRING = "http-blade/1.0.0";
+
+    static void setDefaultHeaders(Headers headers) {
+        headers.set(HttpHeader.USER_AGENT, USER_AGENT_STRING);
+        headers.set(HttpHeader.ACCEPT, "*/*");
+        headers.set(HttpHeader.ACCEPT_ENCODING, "gzip,deflate");
+    }
+
+    static void setDefaultHeaders(HttpRequestBase request) {
+        request.setHeader(HttpHeader.USER_AGENT, USER_AGENT_STRING);
+        request.setHeader(HttpHeader.ACCEPT, "*/*");
+        request.setHeader(HttpHeader.ACCEPT_ENCODING, "gzip,deflate");
+    }
 
 }

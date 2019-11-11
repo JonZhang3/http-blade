@@ -173,13 +173,13 @@ class BaseHttpConnection {
         }
         conn = openConnection(this.url, this.proxy);
         conn.setUseCaches(false);
-        conn.setChunkedStreamingMode(DEFAULT_CHUNK_LENGTH);
         conn.setRequestMethod(method.value());
         conn.setInstanceFollowRedirects(this.maxRedirectCount >= 1);
         conn.setDoInput(true);
         if (requiresRequestBody) {
             conn.setDoOutput(true);
             conn.setUseCaches(false);
+            conn.setChunkedStreamingMode(DEFAULT_CHUNK_LENGTH);
         }
         conn.setConnectTimeout(connectTimeout);
         conn.setReadTimeout(readTimeout);

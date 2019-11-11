@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.httpblade.base.Request;
 import com.httpblade.base.Response;
+import com.httpblade.common.HttpHeader;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -54,10 +55,10 @@ public class HttpBladeTest {
     @Test
     public void testGet() throws IOException {
         HttpBlade.use(HttpBlade.CLIENT_TYPE_OKHTTP);
-        //testGet$();
+        testGet$();
 
         HttpBlade.use(HttpBlade.CLIENT_TYPE_APACHE_HTTP);
-        //testGet$();
+        testGet$();
 
         HttpBlade.use(HttpBlade.CLIENT_TYPE_JDK);
         testGet$();

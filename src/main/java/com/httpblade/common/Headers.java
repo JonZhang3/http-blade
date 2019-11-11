@@ -22,7 +22,13 @@ public final class Headers {
     }
 
     public Headers(Map<String, List<String>> values) {
-        this.headers.putAll(values);
+        if (values != null) {
+            values.forEach((name, values1) -> {
+                if (name != null) {
+                    headers.put(name.toLowerCase(Locale.US), values1);
+                }
+            });
+        }
     }
 
     public Headers add(String name, String value) {
@@ -40,10 +46,6 @@ public final class Headers {
         String lowerCaseName = name.toLowerCase(Locale.US);
         headers.put(lowerCaseName, list);
         return this;
-    }
-
-    private void addAll(String name, List<String> values) {
-        headers.put(name, values);
     }
 
     public Headers remove(String name) {
@@ -100,6 +102,10 @@ public final class Headers {
             }
         });
         return sb.toString();
+    }
+
+    private void addAll(String name, List<String> values) {
+        headers.put(name, values);
     }
 
     private static void checkNameAndValue(String name, String value) {
