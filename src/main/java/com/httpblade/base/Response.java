@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,11 @@ public interface Response {
 
     String header(String name, String defaultValue);
 
+    Date dateHeader(String name);
+
     List<String> headers(String name);
+
+    List<Date> dateHeaders(String name);
 
     Map<String, List<String>> allHeaders();
 

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,8 +139,18 @@ public class OkHttpResponseImpl implements com.httpblade.base.Response {
     }
 
     @Override
+    public Date dateHeader(String name) {
+        return null;
+    }
+
+    @Override
     public List<String> headers(String name) {
         return response.headers(name);
+    }
+
+    @Override
+    public List<Date> dateHeaders(String name) {
+        return null;
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Utils;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
@@ -21,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +59,20 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     }
 
     @Override
+    public ApacheHttpRequestImpl setDateHeader(String name, Date date) {
+        setHeader(name, Utils.formatHttpDate(date));
+        return this;
+    }
+
+    @Override
     public ApacheHttpRequestImpl addHeader(String name, String value) {
         request.addHeader(name, value);
+        return this;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl addDateHeader(String name, Date date) {
+        addHeader(name, Utils.formatHttpDate(date));
         return this;
     }
 

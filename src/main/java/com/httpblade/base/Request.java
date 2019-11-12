@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +60,11 @@ public interface Request<T extends Request> {
 
     T setHeader(String name, String value);
 
+    T setDateHeader(String name, Date date);
+
     T addHeader(String name, String value);
+
+    T addDateHeader(String name, Date date);
 
     T removeHeader(String name);
 
@@ -71,6 +77,10 @@ public interface Request<T extends Request> {
     Map<String, List<String>> allHeaders();
 
     T pathVariable(String name, String value);
+
+    T queryString(String name, String value);
+
+    T queryString(String name, Collection<String> values);
 
     T form(Map<String, String> values);
 

@@ -6,8 +6,10 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.HttpUrl;
+import com.httpblade.common.Utils;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +46,20 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     }
 
     @Override
+    public BaseHttpRequestImpl setDateHeader(String name, Date date) {
+        setHeader(name, Utils.formatHttpDate(date));
+        return this;
+    }
+
+    @Override
     public BaseHttpRequestImpl addHeader(String name, String value) {
         headers.add(name, value);
+        return this;
+    }
+
+    @Override
+    public BaseHttpRequestImpl addDateHeader(String name, Date date) {
+        addHeader(name, Utils.formatHttpDate(date));
         return this;
     }
 

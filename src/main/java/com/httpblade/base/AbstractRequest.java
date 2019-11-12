@@ -13,8 +13,11 @@ import com.httpblade.common.form.Form;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -107,6 +110,21 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
     @Override
     public T contentLength(long length) {
         this.setHeader(HttpHeader.CONTENT_LENGTH, length + "");
+        return (T) this;
+    }
+
+    @Override
+    public T queryString(String name, String value) {
+        return form(name, value);
+    }
+
+    @Override
+    public T queryString(String name, Collection<String> values) {
+        if (values != null) {
+            for (String value : values) {
+                form(name, value);
+            }
+        }
         return (T) this;
     }
 

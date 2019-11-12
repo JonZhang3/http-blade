@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,12 +179,29 @@ public final class ApacheHttpResponseImpl implements Response {
     }
 
     @Override
+    public Date dateHeader(String name) {
+        return Utils.parseHttpDate(header(name));
+    }
+
+    @Override
     public List<String> headers(String name) {
         Header[] headers = response.getHeaders(name);
         List<String> result = new LinkedList<>();
         if (headers != null) {
             for (Header header : headers) {
                 result.add(header.getValue());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Date> dateHeaders(String name) {
+        Header[] headers = response.getHeaders(name);
+        List<Date> result = new LinkedList<>();
+        if(headers != null) {
+            for (Header header : headers) {
+                result.add(Utils.parseHttpDate(header.getValue()));
             }
         }
         return result;

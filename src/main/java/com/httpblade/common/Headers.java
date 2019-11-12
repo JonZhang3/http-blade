@@ -2,6 +2,7 @@ package com.httpblade.common;
 
 import com.httpblade.HttpBlade;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -102,6 +103,11 @@ public final class Headers {
             }
         });
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Headers && this.headers.equals(((Headers) other).headers);
     }
 
     private void addAll(String name, List<String> values) {

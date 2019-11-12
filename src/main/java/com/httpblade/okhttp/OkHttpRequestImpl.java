@@ -5,12 +5,14 @@ import com.httpblade.base.AbstractRequest;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Utils;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -48,8 +50,20 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     }
 
     @Override
+    public OkHttpRequestImpl setDateHeader(String name, Date date) {
+        setHeader(name, Utils.formatHttpDate(date));
+        return this;
+    }
+
+    @Override
     public OkHttpRequestImpl addHeader(String name, String value) {
         headers.add(name, value);
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl addDateHeader(String name, Date date) {
+        addHeader(name, Utils.formatHttpDate(date));
         return this;
     }
 

@@ -70,26 +70,11 @@ public class HttpBladeTest {
             .form("name", "张三")
             .formEncoded("age", "10");
         Response response = HttpBlade.request(request);
-        //assertTrue(response.isOk());
-//        Reader reader = response.reader();
-//        StringWriter sw = new StringWriter();
-//        char[] buffer = new char[1024];
-//        int len = 0;
-//        while ((len = reader.read(buffer)) != -1) {
-//            sw.write(buffer, 0, len);
-//        }
-//        System.out.println(sw.toString());
-        Map<String, List<String>> headers = response.allHeaders();
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            String name = entry.getKey();
-            List<String> values = entry.getValue();
-            System.out.println(name + ":" + values);
-        }
-        System.out.println(response.string());
-//        Map<String, String> map = response.json(new TypeToken<Map<String, String>>() {}.getType());
-//        assertEquals("张三", map.get("name"));
-//        assertEquals("10", map.get("age"));
-//        assertNull(map.get("contentType"));
+        assertTrue(response.isOk());
+        Map<String, String> map = response.json(new TypeToken<Map<String, String>>() {}.getType());
+        assertEquals("张三", map.get("name"));
+        assertEquals("10", map.get("age"));
+        assertNull(map.get("contentType"));
         response.close();
     }
 

@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.DeflaterInputStream;
@@ -176,8 +177,18 @@ public class BaseHttpResponseImpl implements Response {
     }
 
     @Override
+    public Date dateHeader(String name) {
+        return null;
+    }
+
+    @Override
     public List<String> headers(String name) {
         return headers.getList(name);
+    }
+
+    @Override
+    public List<Date> dateHeaders(String name) {
+        return null;
     }
 
     @Override

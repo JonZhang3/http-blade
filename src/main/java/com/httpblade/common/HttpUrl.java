@@ -346,9 +346,9 @@ public final class HttpUrl {
                 if (index > 0) {
                     out.append("&");
                 }
-                out.append(name);
+                out.append(Utils.encode(name, "UTF-8"));
                 if (value != null) {
-                    out.append('=').append(value);
+                    out.append('=').append(Utils.encode(value, "UTF-8"));
                 }
                 index++;
             }
