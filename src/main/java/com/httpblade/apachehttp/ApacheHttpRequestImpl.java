@@ -9,6 +9,8 @@ import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Utils;
+import com.httpblade.common.form.Field;
+import com.httpblade.common.form.Form;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
@@ -153,7 +155,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         HttpEntity entity = null;
         if (!HttpMethod.requiresRequestBody(this.method)) {
             URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
-            this.form.forEachFields(this.charset, (index, name, value) -> uriBuilder.addParameter(name, value));
+            addParameter(uriBuilder, this.form, this.charset.name());
             try {
                 uri = uriBuilder.build();
             } catch (URISyntaxException ignore) {
@@ -163,7 +165,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
             entity = this.body.createApacheHttpEntity(contentType, charset);
             if (this.form.onlyNormalField()) {
                 URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
-                this.form.forEachFields(this.charset, (index, name, value) -> uriBuilder.addParameter(name, value));
+                addParameter(uriBuilder, this.form, this.charset.name());
                 try {
                     uri = uriBuilder.build();
                 } catch (URISyntaxException ignore) {
@@ -183,6 +185,19 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         setGlobalHeaders(request, globalHeaders);
         addCookie(request, cookieHome);
         return request;
+    }
+
+    private static void addParameter(URIBuilder uriBuilder, Form form, String charset) {
+        List<Field> fields = form.fields();
+        for (Field field : fields) {
+            String name = field.name();
+            String value = field.value();
+            if(field.encoded()) {
+                name = Utils.decode(name, charset);
+                value = Utils.decode(value, charset);
+            }
+            uriBuilder.addParameter(name, value);
+        }
     }
 
     private static void setGlobalHeaders(HttpRequestBase request, Headers globalHeaders) {

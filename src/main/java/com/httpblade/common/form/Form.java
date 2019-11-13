@@ -115,39 +115,27 @@ public class Form {
         return BOUNDARY;
     }
 
-    public void forEachFields(Charset charset, Function<Integer, String, String> function) {
+    // 拼接成请求参数格式的字符串
+    private String toParams() {
+        StringBuilder builder = new StringBuilder();
         Field field;
         for(int i = 0, len = fields.size(); i < len; i++) {
             field = fields.get(i);
-            String name = field.name();
-            String value = field.value();
-            if(!field.encoded()) {
-                name = Utils.encode(name, charset.name());
-                value = Utils.encode(value, charset.name());
-            }
-            function.apply(i, name, value);
-        }
-    }
-
-    // 拼接成请求参数格式的字符串
-    public String toParams(Charset charset) {
-        StringBuilder builder = new StringBuilder();
-        forEachFields(charset, (index, name, value) -> {
-            if(index != 0) {
+            if(i != 0) {
                 builder.append('&');
             }
-            builder.append(name);
+            builder.append(field.name());
+            String value = field.value();
             if(value != null) {
                 builder.append('=').append(value);
             }
-        });
+        }
         return builder.toString();
     }
 
     public void writeTo(OutputStream out, Charset charset) throws IOException {
         if (onlyNormalField()) {
-            String content = toParams(charset);
-            out.write(content.getBytes(charset));
+            out.write(toParams().getBytes(charset));
         } else {
             for (FileField fileField : this.fileFields) {
                 appendPart(out, charset, fileField.name(), fileField.file(), fileField.fileName());

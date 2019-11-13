@@ -49,6 +49,9 @@ public final class Utils {
     }
 
     public static String decode(String value, String charsetName) {
+        if(value == null) {
+            return null;
+        }
         try {
             return URLDecoder.decode(value, charsetName);
         } catch (UnsupportedEncodingException e) {

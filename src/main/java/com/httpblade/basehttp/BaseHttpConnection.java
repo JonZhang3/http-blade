@@ -4,13 +4,8 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.base.Cookie;
 import com.httpblade.base.CookieHome;
 import com.httpblade.base.Response;
-import com.httpblade.common.Body;
-import com.httpblade.common.ContentType;
-import com.httpblade.common.Headers;
-import com.httpblade.common.HttpHeader;
-import com.httpblade.common.HttpMethod;
-import com.httpblade.common.HttpStatus;
-import com.httpblade.common.HttpUrl;
+import com.httpblade.common.*;
+import com.httpblade.common.form.Field;
 import com.httpblade.common.form.Form;
 
 import javax.net.ssl.HostnameVerifier;
@@ -128,10 +123,10 @@ class BaseHttpConnection {
     Response execute() throws IOException {
         String contentType = this.headers.get(HttpHeader.CONTENT_TYPE);
         if (!requiresRequestBody) {
-            form.forEachFields(charset, (index, name, value) -> httpUrl.addQuery(name, value));
+            addParameter(httpUrl, form, charset.name());
         } else if (body != null) {
             if (form.onlyNormalField()) {
-                form.forEachFields(charset, (index, name, value) -> httpUrl.addQuery(name, value));
+                addParameter(httpUrl, form, charset.name());
             } else {
                 throw new HttpBladeException("You have provided the request body for the request.");
             }
@@ -220,6 +215,18 @@ class BaseHttpConnection {
         throw new HttpBladeException("the url protocol must be http or https");
     }
 
+    private static void addParameter(HttpUrl url, Form form, String charset) {
+        for (Field field : form.fields()) {
+            String name = field.name();
+            String value = field.value();
+            if(!field.encoded()) {
+                name = Utils.encode(name, charset);
+                value = Utils.encode(value, charset);
+            }
+            url.addQuery(name, value);
+        }
+    }
+
     private static void addHeaders(HttpURLConnection conn, Headers headers) {
         BiConsumer<String, List<String>> consumer = (name, values) -> {
             if (values.size() == 1) {
@@ -268,11 +275,15 @@ class BaseHttpConnection {
 
     private static String getContentType(Body body, String contentType) {
         String result = contentType;
-        if (result != null) {
-            if (body.isString()) {
-                result = ContentType.guessContentType(body.getStringData());
+        if(result == null) {
+            if(body.getContentType() != null) {
+                result = body.getContentType();
             } else {
-                result = ContentType.OCTET_STREAM;
+                if (body.isString()) {
+                    result = ContentType.guessContentType(body.getStringData());
+                } else {
+                    result = ContentType.OCTET_STREAM;
+                }
             }
         }
         return result;
