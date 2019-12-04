@@ -8,8 +8,10 @@ import com.httpblade.common.HttpMethod;
 import com.httpblade.common.HttpUrl;
 import com.httpblade.common.Utils;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,10 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     private HttpUrl httpUrl;
     private HttpMethod method;
+    private URL url;
+    private String path;
+    private String queryString;
+    private Map<String, List<String>> queries = new HashMap<>();
 
     public BaseHttpRequestImpl() {
         Defaults.setDefaultHeaders(this.headers);
@@ -25,6 +31,20 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     @Override
     public BaseHttpRequestImpl url(String url) {
         this.httpUrl = new HttpUrl(url);
+        try {
+            this.url = new URL(url);
+            this.path = this.url.getPath();
+            if(this.path == null) {
+                this.path = "/";
+            }
+            this.queryString = this.url.getQuery();
+            if(this.queryString == null) {
+                this.queryString = "";
+            }
+            Utils.parseQueryString(queryString, queries);
+        } catch (MalformedURLException e) {
+            throw new HttpBladeException(e);
+        }
         return this;
     }
 
@@ -91,7 +111,8 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     @Override
     public BaseHttpRequestImpl pathVariable(String name, String value) {
-        httpUrl.setPathVariable(name, value);
+        //httpUrl.setPathVariable(name, value);
+        this.path = path.replaceAll("\\{ + name + \\}", Utils.encode(value, "UTF-8"));
         return this;
     }
 
