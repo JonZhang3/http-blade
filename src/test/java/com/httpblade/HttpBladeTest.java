@@ -143,4 +143,9 @@ public class HttpBladeTest {
         System.out.println(response.string());
     }
 
+    @Test
+    public void testCookie() {
+
+    }
+
 }
