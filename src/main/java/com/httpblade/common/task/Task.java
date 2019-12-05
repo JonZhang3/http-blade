@@ -1,6 +1,6 @@
 package com.httpblade.common.task;
 
-import com.httpblade.base.Callback;
+import com.httpblade.Callback;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;

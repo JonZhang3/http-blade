@@ -1,6 +1,6 @@
 package com.httpblade.apachehttp;
 
-import com.httpblade.base.CookieHome;
+import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
@@ -18,7 +18,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.net.Authenticator;
 import java.util.concurrent.TimeUnit;
 
-public class ApacheHttpClientBuilderImpl implements com.httpblade.base.HttpClientBuilder<ApacheHttpClientBuilderImpl> {
+public class ApacheHttpClientBuilderImpl implements com.httpblade.HttpClientBuilder<ApacheHttpClientBuilderImpl> {
 
     HttpClientBuilder clientBuilder;
     RequestConfig.Builder requestConfigBuilder;

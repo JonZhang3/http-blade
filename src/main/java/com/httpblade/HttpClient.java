@@ -1,4 +1,4 @@
-package com.httpblade.base;
+package com.httpblade;
 
 import com.httpblade.common.Proxy;
 
@@ -12,7 +12,7 @@ import javax.net.ssl.SSLSocketFactory;
  * @author Jon
  * @since 1.0.0
  */
-public interface HttpClient {
+public abstract class HttpClient {
 
     /**
      * 同步发起请求
@@ -20,34 +20,34 @@ public interface HttpClient {
      * @param request Http 请求
      * @return 响应内容
      */
-    Response request(Request request);
+    protected abstract Response request(Request request);
 
     /**
      * 异步发起请求
      *
      * @param request Http 请求
      */
-    void requestAsync(Request request, Callback callback);
+    abstract void requestAsync(Request request, Callback callback);
 
     /**
      * 获取连接超时时间
      *
      * @return 连接超时时间，单位：毫秒
      */
-    long connectTimeout();
+    abstract long connectTimeout();
 
-    long readTimeout();
+    abstract long readTimeout();
 
-    long writeTimeout();
+    abstract long writeTimeout();
 
-    int maxRedirectCount();
+    abstract int maxRedirectCount();
 
-    CookieHome cookieHome();
+    abstract CookieHome cookieHome();
 
-    HostnameVerifier hostnameVerifier();
+    abstract HostnameVerifier hostnameVerifier();
 
-    SSLSocketFactory sslSocketFactory();
+    abstract SSLSocketFactory sslSocketFactory();
 
-    Proxy proxy();
+    abstract Proxy proxy();
 
 }

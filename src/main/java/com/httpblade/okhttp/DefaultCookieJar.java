@@ -1,6 +1,6 @@
 package com.httpblade.okhttp;
 
-import com.httpblade.base.CookieHome;
+import com.httpblade.CookieHome;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -22,7 +22,7 @@ class DefaultCookieJar implements CookieJar {
 
     @Override
     public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-        List<com.httpblade.base.Cookie> baseCookies = new LinkedList<>();
+        List<com.httpblade.Cookie> baseCookies = new LinkedList<>();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 baseCookies.add(new OkHttpCookieImpl(cookie));
@@ -33,10 +33,10 @@ class DefaultCookieJar implements CookieJar {
 
     @Override
     public List<Cookie> loadForRequest(HttpUrl url) {
-        List<com.httpblade.base.Cookie> baseCookies = cookieHome.load(url.url());
+        List<com.httpblade.Cookie> baseCookies = cookieHome.load(url.url());
         List<Cookie> cookies = new LinkedList<>();
         if (baseCookies != null) {
-            for (com.httpblade.base.Cookie baseCookie : baseCookies) {
+            for (com.httpblade.Cookie baseCookie : baseCookies) {
                 Cookie.Builder builder = new Cookie.Builder()
                     .name(baseCookie.name())
                     .value(baseCookie.value())

@@ -1,9 +1,9 @@
 package com.httpblade.basehttp;
 
 import com.httpblade.HttpBladeException;
-import com.httpblade.base.Cookie;
-import com.httpblade.base.CookieHome;
-import com.httpblade.base.Response;
+import com.httpblade.Cookie;
+import com.httpblade.CookieHome;
+import com.httpblade.Response;
 import com.httpblade.common.*;
 import com.httpblade.common.form.Field;
 import com.httpblade.common.form.Form;

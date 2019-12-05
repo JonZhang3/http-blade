@@ -1,4 +1,4 @@
-package com.httpblade.base;
+package com.httpblade;
 
 import java.net.URL;
 import java.util.List;

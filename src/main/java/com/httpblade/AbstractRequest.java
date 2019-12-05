@@ -1,8 +1,5 @@
-package com.httpblade.base;
+package com.httpblade;
 
-import com.httpblade.HttpBlade;
-import com.httpblade.JsonParserFactory;
-import com.httpblade.XmlParserFactory;
 import com.httpblade.common.Body;
 import com.httpblade.common.ContentType;
 import com.httpblade.common.Headers;
@@ -20,12 +17,17 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public abstract class AbstractRequest<T extends AbstractRequest> implements Request<T> {
 
+    protected HttpClient client;
     protected Charset charset = StandardCharsets.UTF_8;
     protected String basicUsername;
     protected String basicPassword;
     protected Form form = new Form();
     protected Headers headers = new Headers();
     protected Body body;
+
+    protected AbstractRequest(HttpClient client) {
+        this.client = client;
+    }
 
     @Override
     public T get(String url) {

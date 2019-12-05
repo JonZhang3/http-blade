@@ -1,12 +1,11 @@
 package com.httpblade.okhttp;
 
 import com.httpblade.HttpBladeException;
-import com.httpblade.base.CookieHome;
+import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
-import com.httpblade.base.Request;
+import com.httpblade.Request;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
-import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -44,7 +43,7 @@ public class OkHttpClientImpl implements HttpClient {
     }
 
     @Override
-    public com.httpblade.base.Response request(Request request) {
+    public com.httpblade.Response request(Request request) {
         OkHttpRequestImpl requestImpl = (OkHttpRequestImpl) request;
         try {
             Response response = client.newCall(requestImpl.build(this.globalHeaders)).execute();
@@ -55,7 +54,7 @@ public class OkHttpClientImpl implements HttpClient {
     }
 
     @Override
-    public void requestAsync(Request request, com.httpblade.base.Callback callback) {
+    public void requestAsync(Request request, com.httpblade.Callback callback) {
         OkHttpRequestImpl requestImpl = (OkHttpRequestImpl) request;
         client.newCall(requestImpl.build(this.globalHeaders)).enqueue(new Callback() {
             @Override

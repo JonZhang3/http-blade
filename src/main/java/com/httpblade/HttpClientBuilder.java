@@ -1,4 +1,4 @@
-package com.httpblade.base;
+package com.httpblade;
 
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;

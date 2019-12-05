@@ -1,11 +1,11 @@
 package com.httpblade.apachehttp;
 
 import com.httpblade.HttpBladeException;
-import com.httpblade.base.Callback;
-import com.httpblade.base.CookieHome;
+import com.httpblade.Callback;
+import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
-import com.httpblade.base.Request;
-import com.httpblade.base.Response;
+import com.httpblade.Request;
+import com.httpblade.Response;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;

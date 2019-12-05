@@ -1,9 +1,9 @@
 package com.httpblade.apachehttp;
 
 import com.httpblade.HttpBladeException;
-import com.httpblade.base.AbstractRequest;
-import com.httpblade.base.Cookie;
-import com.httpblade.base.CookieHome;
+import com.httpblade.AbstractRequest;
+import com.httpblade.Cookie;
+import com.httpblade.CookieHome;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;

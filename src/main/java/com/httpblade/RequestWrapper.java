@@ -1,9 +1,6 @@
 package com.httpblade;
 
-import com.httpblade.base.Callback;
 import com.httpblade.base.HttpClient;
-import com.httpblade.base.Request;
-import com.httpblade.base.Response;
 import com.httpblade.common.HttpMethod;
 
 import java.io.File;

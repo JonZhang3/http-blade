@@ -4,10 +4,9 @@ import com.httpblade.HttpBlade;
 import com.httpblade.HttpBladeException;
 import com.httpblade.JsonParserFactory;
 import com.httpblade.XmlParserFactory;
-import com.httpblade.base.Cookie;
+import com.httpblade.Cookie;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Utils;
-import okhttp3.Headers;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -17,11 +16,10 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OkHttpResponseImpl implements com.httpblade.base.Response {
+public class OkHttpResponseImpl implements com.httpblade.Response {
 
     private Response response;
 

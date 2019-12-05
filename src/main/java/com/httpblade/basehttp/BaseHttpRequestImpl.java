@@ -1,7 +1,7 @@
 package com.httpblade.basehttp;
 
 import com.httpblade.HttpBladeException;
-import com.httpblade.base.AbstractRequest;
+import com.httpblade.AbstractRequest;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;

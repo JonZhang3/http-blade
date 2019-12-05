@@ -1,4 +1,4 @@
-package com.httpblade.base;
+package com.httpblade;
 
 import java.io.File;
 import java.io.InputStream;

@@ -1,8 +1,8 @@
 package com.httpblade.okhttp;
 
-import com.httpblade.base.CookieHome;
+import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
-import com.httpblade.base.HttpClientBuilder;
+import com.httpblade.HttpClientBuilder;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;

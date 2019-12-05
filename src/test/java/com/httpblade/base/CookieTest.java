@@ -1,5 +1,6 @@
 package com.httpblade.base;
 
+import com.httpblade.Cookie;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

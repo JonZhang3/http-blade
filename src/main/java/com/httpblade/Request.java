@@ -1,7 +1,10 @@
-package com.httpblade.base;
+package com.httpblade;
 
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLSocketFactoryBuilder;
 
+import javax.net.ssl.HostnameVerifier;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -9,6 +12,7 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * HTTP 请求
@@ -25,6 +29,8 @@ public interface Request<T extends Request> {
      * @return {@code this}
      */
     T url(String url);
+
+    URL getUrl();
 
     /**
      * 指定
@@ -50,6 +56,8 @@ public interface Request<T extends Request> {
     T connect(String url);
 
     T patch(String url);
+
+    HttpMethod getMethod();
 
     T charset(Charset charset);
 
@@ -107,8 +115,32 @@ public interface Request<T extends Request> {
 
     T basicAuth(String username, String password);
 
-    URL getUrl();
+    T proxy(Proxy proxy);
 
-    HttpMethod getMethod();
+    T proxy(String host, int port);
+
+    T proxy(String host, int port, String username, String password);
+
+    T connectTimeout(long time, TimeUnit unit);
+
+    T readTimeout(long time, TimeUnit unit);
+
+    T writeTimeout(long time, TimeUnit unit);
+
+    /**
+     * 设置最大的重定向次数，如果设置为 0 表示不进行自动重定向操作。
+     * 默认值为 1，即自动进行一次重定向操作。
+     * @param maxCount 重定向次数
+     * @return this
+     */
+    T maxRedirectCount(int maxCount);
+
+    T hostnameVerifier(HostnameVerifier hostnameVerifier);
+
+    T sslSocketFactory(SSLSocketFactoryBuilder builder);
+
+    Response request();
+
+    void requestAsync(Callback callback);
 
 }

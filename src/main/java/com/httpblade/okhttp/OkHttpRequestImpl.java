@@ -1,20 +1,27 @@
 package com.httpblade.okhttp;
 
 import com.httpblade.HttpBladeException;
-import com.httpblade.base.AbstractRequest;
+import com.httpblade.AbstractRequest;
+import com.httpblade.Callback;
+import com.httpblade.HttpClient;
+import com.httpblade.Response;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLSocketFactoryBuilder;
 import com.httpblade.common.Utils;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import javax.net.ssl.HostnameVerifier;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
@@ -23,7 +30,8 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     private String path;
     private HttpMethod method;
 
-    public OkHttpRequestImpl() {
+    public OkHttpRequestImpl(HttpClient client) {
+        super(client);
         Defaults.setDefaultHeaders(headers);
     }
 
@@ -99,6 +107,71 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             path = path.replaceAll("%7B" + name + "%7D", value);
         }
         return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl proxy(Proxy proxy) {
+        if(proxy != null) {
+
+        }
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl proxy(String host, int port) {
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl proxy(String host, int port, String username, String password) {
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl connectTimeout(long time, TimeUnit unit) {
+        if(time >= 0) {
+
+        }
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl readTimeout(long time, TimeUnit unit) {
+        if(time >= 0) {
+
+        }
+        return null;
+    }
+
+    @Override
+    public OkHttpRequestImpl writeTimeout(long time, TimeUnit unit) {
+        return null;
+    }
+
+    @Override
+    public OkHttpRequestImpl maxRedirectCount(int maxCount) {
+        return null;
+    }
+
+    @Override
+    public OkHttpRequestImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
+        return null;
+    }
+
+    @Override
+    public OkHttpRequestImpl sslSocketFactory(SSLSocketFactoryBuilder builder) {
+        return null;
+    }
+
+    @Override
+    public Response request() {
+
+        return null;
+    }
+
+    @Override
+    public void requestAsync(Callback callback) {
+
     }
 
     @Override

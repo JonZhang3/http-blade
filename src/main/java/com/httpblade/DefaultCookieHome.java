@@ -1,8 +1,5 @@
 package com.httpblade;
 
-import com.httpblade.base.Cookie;
-import com.httpblade.base.CookieHome;
-
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;

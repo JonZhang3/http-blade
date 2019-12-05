@@ -4,8 +4,6 @@ import com.httpblade.apachehttp.ApacheHttpClientBuilderImpl;
 import com.httpblade.apachehttp.ApacheHttpClientImpl;
 import com.httpblade.apachehttp.ApacheHttpRequestImpl;
 import com.httpblade.base.HttpClient;
-import com.httpblade.base.HttpClientBuilder;
-import com.httpblade.base.Request;
 import com.httpblade.basehttp.BaseHttpClientBuilderImpl;
 import com.httpblade.basehttp.BaseHttpClientImpl;
 import com.httpblade.basehttp.BaseHttpRequestImpl;
