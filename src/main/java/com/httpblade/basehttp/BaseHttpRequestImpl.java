@@ -2,7 +2,7 @@ package com.httpblade.basehttp;
 
 import com.httpblade.HttpBladeException;
 import com.httpblade.AbstractRequest;
-import com.httpblade.common.Defaults;
+import com.httpblade.common.Constants;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.HttpUrl;
@@ -25,7 +25,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     private Map<String, List<String>> queries = new HashMap<>();
 
     public BaseHttpRequestImpl() {
-        Defaults.setDefaultHeaders(this.headers);
+        Constants.setDefaultHeaders(this.headers);
     }
 
     @Override

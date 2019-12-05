@@ -4,7 +4,7 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.AbstractRequest;
 import com.httpblade.Cookie;
 import com.httpblade.CookieHome;
-import com.httpblade.common.Defaults;
+import com.httpblade.common.Constants;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
@@ -35,7 +35,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     private HttpEntityRequestImpl request = new HttpEntityRequestImpl();
 
     public ApacheHttpRequestImpl() {
-        Defaults.setDefaultHeaders(request);
+        Constants.setDefaultHeaders(request);
     }
 
     @Override

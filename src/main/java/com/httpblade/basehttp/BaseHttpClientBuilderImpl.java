@@ -3,7 +3,7 @@ package com.httpblade.basehttp;
 import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.HttpClientBuilder;
-import com.httpblade.common.Defaults;
+import com.httpblade.common.Constants;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;
@@ -16,10 +16,10 @@ import java.util.concurrent.TimeUnit;
 
 public class BaseHttpClientBuilderImpl implements HttpClientBuilder<BaseHttpClientBuilderImpl> {
 
-    long connectTimeout = Defaults.CONNECT_TIMEOUT;
-    long readTimeout = Defaults.READ_TIMEOUT;
-    long writeTimeout = Defaults.WRITE_TIMEOUT;
-    int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
+    long connectTimeout = Constants.CONNECT_TIMEOUT;
+    long readTimeout = Constants.READ_TIMEOUT;
+    long writeTimeout = Constants.WRITE_TIMEOUT;
+    int maxRedirectCount = Constants.MAX_REDIRECT_COUNT;
     CookieHome cookieHome;
     Headers globalHeaders = new Headers();
     Proxy proxy;

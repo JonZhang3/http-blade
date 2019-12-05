@@ -1,6 +1,11 @@
 package com.httpblade;
 
-import com.httpblade.base.HttpClient;
+import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLSocketFactoryBuilder;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import java.util.concurrent.TimeUnit;
 
 public final class HttpBlade {
 
@@ -22,10 +27,10 @@ public final class HttpBlade {
      */
     public static final int CLIENT_TYPE_APACHE_HTTP = Environment.CLIENT_TYPE_APACHE_HTTP;
 
-    public static final HttpBlade INSTANCE = null;
+    public static final HttpBlade INSTANCE = new HttpBlade();
 
-    public static HttpBlade create() {
-        return null;
+    public static HttpBladeBuilder create() {
+        return new HttpBladeBuilder();
     }
 
     private HttpClient client;
@@ -34,13 +39,9 @@ public final class HttpBlade {
         client = Environment.defaultClient;
     }
 
-//    public static Request createRequest() {
-//        return Environment.newRequest();
-//    }
+    HttpBlade(HttpBladeBuilder builder) {
 
-//    public static HttpClientBuilder createClientBuilder() {
-//        return Environment.newClientBuilder();
-//    }
+    }
 
     public static int nowClientType() {
         return Environment.nowUseClientType;
@@ -66,7 +67,6 @@ public final class HttpBlade {
 //    public static HttpClient defaultClient() {
 //        return Environment.defaultClient;
 //    }
-
     public static void setJsonParserFactory(JsonParserFactory parserFactory) {
         HttpBlade.jsonParserFactory = parserFactory;
     }
@@ -103,24 +103,94 @@ public final class HttpBlade {
         return Environment.newRequest().head(url);
     }
 
-    public static Request options(String url) {
+    public Request options(String url) {
         return Environment.newRequest().options(url);
     }
 
-    public static Request trace(String url) {
+    public Request trace(String url) {
         return Environment.newRequest().trace(url);
     }
 
-    public static Request connect(String url) {
+    public Request connect(String url) {
         return Environment.newRequest().connect(url);
     }
 
-    public static Request patch(String url) {
+    public Request patch(String url) {
         return Environment.newRequest().patch(url);
     }
 
-    HttpClient getClient() {
-        return client;
+    public HttpBladeBuilder newBuilder() {
+        return new HttpBladeBuilder(this);
+    }
+
+    public static class HttpBladeBuilder {
+
+        private long connectTimeout;
+        private long readTimeout;
+        private long writeTimeout;
+        private Proxy proxy;
+        private HostnameVerifier hostnameVerifier;
+        private CookieHome cookieHome;
+        private SocketFactory socketFactory;
+        private SSLSocketFactoryBuilder sslSocketFactoryBuilder;
+
+        public HttpBladeBuilder() {
+
+        }
+
+        public HttpBladeBuilder(HttpBlade httpBlade) {
+
+        }
+
+        public HttpBladeBuilder connectTimeout(long time, TimeUnit unit) {
+            this.connectTimeout = unit.toMillis(time);
+            return this;
+        }
+
+        public HttpBladeBuilder readTimeout(long time, TimeUnit unit) {
+            this.readTimeout = unit.toMillis(time);
+            return this;
+        }
+
+        public HttpBladeBuilder writeTimeout(long time, TimeUnit unit) {
+            this.writeTimeout = unit.toMillis(time);
+            return this;
+        }
+
+        public HttpBladeBuilder proxy(Proxy proxy) {
+            this.proxy = proxy;
+            return this;
+        }
+
+        public HttpBladeBuilder proxy(String host, int port) {
+            this.proxy = new Proxy(host, port);
+            return this;
+        }
+
+        public HttpBladeBuilder proxy(String host, int port, String username, String password) {
+            this.proxy = new Proxy(host, port, username, password);
+            return this;
+        }
+
+        public HttpBladeBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+            this.hostnameVerifier = hostnameVerifier;
+            return this;
+        }
+
+        public HttpBladeBuilder socketFactory(SocketFactory socketFactory) {
+            this.socketFactory = socketFactory;
+            return this;
+        }
+
+        public HttpBladeBuilder sslSocketFactory(SSLSocketFactoryBuilder builder) {
+            this.sslSocketFactoryBuilder = builder;
+            return this;
+        }
+
+        public HttpBlade build() {
+            return null;
+        }
+
     }
 
 }

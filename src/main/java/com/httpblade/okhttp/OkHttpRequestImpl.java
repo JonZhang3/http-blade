@@ -1,11 +1,12 @@
 package com.httpblade.okhttp;
 
+import com.httpblade.HttpBlade;
 import com.httpblade.HttpBladeException;
 import com.httpblade.AbstractRequest;
 import com.httpblade.Callback;
 import com.httpblade.HttpClient;
 import com.httpblade.Response;
-import com.httpblade.common.Defaults;
+import com.httpblade.common.Constants;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
@@ -13,6 +14,7 @@ import com.httpblade.common.SSLSocketFactoryBuilder;
 import com.httpblade.common.Utils;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
@@ -25,14 +27,19 @@ import java.util.concurrent.TimeUnit;
 
 public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
+    private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder()
+
+        .build();
+
     private Request.Builder builder = new Request.Builder();
     private HttpUrl url;
     private String path;
     private HttpMethod method;
+    private OkHttpClient customClient;
 
     public OkHttpRequestImpl(HttpClient client) {
         super(client);
-        Defaults.setDefaultHeaders(headers);
+        Constants.setDefaultHeaders(headers);
     }
 
     @Override
@@ -112,7 +119,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     @Override
     public OkHttpRequestImpl proxy(Proxy proxy) {
         if(proxy != null) {
-
+            if(customClient == null) {
+                HttpBlade.DEFAULTS
+            }
         }
         return this;
     }

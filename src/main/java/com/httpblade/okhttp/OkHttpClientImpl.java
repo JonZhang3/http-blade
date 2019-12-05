@@ -4,7 +4,7 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.Request;
-import com.httpblade.common.Defaults;
+import com.httpblade.common.Constants;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;
 import okhttp3.Call;
@@ -20,15 +20,15 @@ import java.util.concurrent.TimeUnit;
 public class OkHttpClientImpl implements HttpClient {
 
     private OkHttpClient client;
-    private int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
+    private int maxRedirectCount = Constants.MAX_REDIRECT_COUNT;
     private Headers globalHeaders;
     private final Proxy proxy;
 
     public OkHttpClientImpl() {
         client = new OkHttpClientBuilderImpl()
-            .connectTimeout(Defaults.CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-            .readTimeout(Defaults.READ_TIMEOUT, TimeUnit.MILLISECONDS)
-            .writeTimeout(Defaults.WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .connectTimeout(Constants.CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+            .readTimeout(Constants.READ_TIMEOUT, TimeUnit.MILLISECONDS)
+            .writeTimeout(Constants.WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
             .maxRedirectCount(maxRedirectCount)
             .builder
             .build();

@@ -6,7 +6,7 @@ import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.Request;
 import com.httpblade.Response;
-import com.httpblade.common.Defaults;
+import com.httpblade.common.Constants;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Utils;
@@ -20,10 +20,10 @@ import java.net.Proxy;
 
 public class BaseHttpClientImpl implements HttpClient {
 
-    private long connectTimeout = Defaults.CONNECT_TIMEOUT;
-    private long readTimeout = Defaults.READ_TIMEOUT;
-    private long writeTimeout = Defaults.WRITE_TIMEOUT;
-    private int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
+    private long connectTimeout = Constants.CONNECT_TIMEOUT;
+    private long readTimeout = Constants.READ_TIMEOUT;
+    private long writeTimeout = Constants.WRITE_TIMEOUT;
+    private int maxRedirectCount = Constants.MAX_REDIRECT_COUNT;
     private CookieHome cookieHome;
     private Headers globalHeaders;
     private Proxy proxy;
