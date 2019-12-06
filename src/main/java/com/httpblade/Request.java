@@ -4,6 +4,7 @@ import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import java.io.File;
 import java.io.InputStream;
@@ -136,6 +137,8 @@ public interface Request<T extends Request> {
     T maxRedirectCount(int maxCount);
 
     T hostnameVerifier(HostnameVerifier hostnameVerifier);
+
+    T socketFactory(SocketFactory socketFactory);
 
     T sslSocketFactory(SSLSocketFactoryBuilder builder);
 

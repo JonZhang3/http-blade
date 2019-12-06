@@ -17,7 +17,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public abstract class AbstractRequest<T extends AbstractRequest> implements Request<T> {
 
-    protected HttpClient client;
+    protected final HttpClient client;
     protected Charset charset = StandardCharsets.UTF_8;
     protected String basicUsername;
     protected String basicPassword;
@@ -25,7 +25,7 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
     protected Headers headers = new Headers();
     protected Body body;
 
-    protected AbstractRequest(HttpClient client) {
+    protected AbstractRequest(final HttpClient client) {
         this.client = client;
     }
 

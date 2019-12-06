@@ -34,8 +34,8 @@ public final class HttpBlade {
 
     public static final HttpBlade INSTANCE = new HttpBlade();
 
-    public static HttpBladeBuilder create() {
-        return new HttpBladeBuilder();
+    public static Builder create() {
+        return new Builder();
     }
 
     private HttpClient client;
@@ -44,7 +44,7 @@ public final class HttpBlade {
         client = Environment.defaultClient;
     }
 
-    HttpBlade(HttpBladeBuilder builder) {
+    HttpBlade(Builder builder) {
 
     }
 
@@ -104,11 +104,11 @@ public final class HttpBlade {
         return Environment.newRequest().patch(url);
     }
 
-    public HttpBladeBuilder newBuilder() {
-        return new HttpBladeBuilder(this);
+    public Builder newBuilder() {
+        return new Builder(this);
     }
 
-    public static class HttpBladeBuilder {
+    public static class Builder {
 
         private String baseUrl = "";
         private long connectTimeout;
@@ -121,168 +121,173 @@ public final class HttpBlade {
         private SSLSocketFactoryBuilder sslSocketFactoryBuilder;
         private Map<String, Headers> globalHeaders = new LinkedHashMap<>();
 
-        public HttpBladeBuilder() {
+        public Builder() {
 
         }
 
-        HttpBladeBuilder(HttpBlade httpBlade) {
+        Builder(HttpBlade httpBlade) {
 
         }
 
-        public HttpBladeBuilder baseUrl(String baseUrl) {
+        public Builder baseUrl(String baseUrl) {
             if (baseUrl != null) {
-                this.baseUrl = baseUrl;
+                if(baseUrl.charAt(baseUrl.length() - 1) == '/') {
+                    // TODO substring方法的性能问题，与 toCharArray 比较
+                    this.baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+                } else {
+                    this.baseUrl = baseUrl;
+                }
             }
             return this;
         }
 
-        public HttpBladeBuilder connectTimeout(long time, TimeUnit unit) {
+        public Builder connectTimeout(long time, TimeUnit unit) {
             if (time > 0) {
                 this.connectTimeout = unit.toMillis(time);
             }
             return this;
         }
 
-        public HttpBladeBuilder readTimeout(long time, TimeUnit unit) {
+        public Builder readTimeout(long time, TimeUnit unit) {
             if (time > 0) {
                 this.readTimeout = unit.toMillis(time);
             }
             return this;
         }
 
-        public HttpBladeBuilder writeTimeout(long time, TimeUnit unit) {
+        public Builder writeTimeout(long time, TimeUnit unit) {
             if (time > 0) {
                 this.writeTimeout = unit.toMillis(time);
             }
             return this;
         }
 
-        public HttpBladeBuilder proxy(Proxy proxy) {
+        public Builder proxy(Proxy proxy) {
             this.proxy = proxy;
             return this;
         }
 
-        public HttpBladeBuilder proxy(String host, int port) {
+        public Builder proxy(String host, int port) {
             this.proxy = new Proxy(host, port);
             return this;
         }
 
-        public HttpBladeBuilder proxy(String host, int port, String username, String password) {
+        public Builder proxy(String host, int port, String username, String password) {
             this.proxy = new Proxy(host, port, username, password);
             return this;
         }
 
-        public HttpBladeBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+        public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
             this.hostnameVerifier = hostnameVerifier;
             return this;
         }
 
-        public HttpBladeBuilder socketFactory(SocketFactory socketFactory) {
+        public Builder socketFactory(SocketFactory socketFactory) {
             this.socketFactory = socketFactory;
             return this;
         }
 
-        public HttpBladeBuilder sslSocketFactory(SSLSocketFactoryBuilder builder) {
+        public Builder sslSocketFactory(SSLSocketFactoryBuilder builder) {
             this.sslSocketFactoryBuilder = builder;
             return this;
         }
 
-        public HttpBladeBuilder setHeader(String name, String value) {
+        public Builder setHeader(String name, String value) {
             getHeaders(Defaults.KEY_COMMON).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addHeader(String name, String value) {
+        public Builder addHeader(String name, String value) {
             getHeaders(Defaults.KEY_COMMON).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setGetHeader(String name, String value) {
+        public Builder setGetHeader(String name, String value) {
             getHeaders(HttpMethod.GET.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addGetHeader(String name, String value) {
+        public Builder addGetHeader(String name, String value) {
             getHeaders(HttpMethod.GET.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setPostHeader(String name, String value) {
+        public Builder setPostHeader(String name, String value) {
             getHeaders(HttpMethod.POST.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addPostHeader(String name, String value) {
+        public Builder addPostHeader(String name, String value) {
             getHeaders(HttpMethod.POST.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setPutHeader(String name, String value) {
+        public Builder setPutHeader(String name, String value) {
             getHeaders(HttpMethod.PUT.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addPutHeader(String name, String value) {
+        public Builder addPutHeader(String name, String value) {
             getHeaders(HttpMethod.PUT.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setDeleteHeader(String name, String value) {
+        public Builder setDeleteHeader(String name, String value) {
             getHeaders(HttpMethod.DELETE.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addDeleteHeader(String name, String value) {
+        public Builder addDeleteHeader(String name, String value) {
             getHeaders(HttpMethod.DELETE.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setHeadHeader(String name, String value) {
+        public Builder setHeadHeader(String name, String value) {
             getHeaders(HttpMethod.HEAD.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addHeadHeader(String name, String value) {
+        public Builder addHeadHeader(String name, String value) {
             getHeaders(HttpMethod.HEAD.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setOptionsHeader(String name, String value) {
+        public Builder setOptionsHeader(String name, String value) {
             getHeaders(HttpMethod.OPTIONS.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addOptionsHeader(String name, String value) {
+        public Builder addOptionsHeader(String name, String value) {
             getHeaders(HttpMethod.OPTIONS.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setTraceHeader(String name, String value) {
+        public Builder setTraceHeader(String name, String value) {
             getHeaders(HttpMethod.TRACE.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addTraceHeader(String name, String value) {
+        public Builder addTraceHeader(String name, String value) {
             getHeaders(HttpMethod.TRACE.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setConnectHeader(String name, String value) {
+        public Builder setConnectHeader(String name, String value) {
             getHeaders(HttpMethod.CONNECT.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addConnectHeader(String name, String value) {
+        public Builder addConnectHeader(String name, String value) {
             getHeaders(HttpMethod.CONNECT.value()).add(name, value);
             return this;
         }
 
-        public HttpBladeBuilder setPatchHeader(String name, String value) {
+        public Builder setPatchHeader(String name, String value) {
             getHeaders(HttpMethod.PATCH.value()).set(name, value);
             return this;
         }
 
-        public HttpBladeBuilder addPatchHeader(String name, String value) {
+        public Builder addPatchHeader(String name, String value) {
             getHeaders(HttpMethod.PATCH.value()).add(name, value);
             return this;
         }
@@ -299,7 +304,6 @@ public final class HttpBlade {
             }
             return headers;
         }
-
     }
 
 }

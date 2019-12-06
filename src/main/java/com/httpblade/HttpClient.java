@@ -112,6 +112,10 @@ public abstract class HttpClient {
         return globalHeaders.get(Defaults.KEY_COMMON);
     }
 
+    public Headers headers(String key) {
+        return globalHeaders.get(key);
+    }
+
     public Headers getHeaders() {
         return globalHeaders.get(HttpMethod.GET.value());
     }
