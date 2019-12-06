@@ -6,7 +6,7 @@ import com.httpblade.AbstractRequest;
 import com.httpblade.Callback;
 import com.httpblade.HttpClient;
 import com.httpblade.Response;
-import com.httpblade.common.Constants;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
@@ -27,19 +27,17 @@ import java.util.concurrent.TimeUnit;
 
 public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
-    private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder()
-
-        .build();
-
     private Request.Builder builder = new Request.Builder();
     private HttpUrl url;
     private String path;
     private HttpMethod method;
-    private OkHttpClient customClient;
+    private OkHttpClient.Builder customClientBuilder;
+    private OkHttpClient nowClient;
 
     public OkHttpRequestImpl(HttpClient client) {
         super(client);
-        Constants.setDefaultHeaders(headers);
+        nowClient = (OkHttpClient) client.raw();
+        Defaults.setDefaultHeaders(headers);
     }
 
     @Override
@@ -119,8 +117,12 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     @Override
     public OkHttpRequestImpl proxy(Proxy proxy) {
         if(proxy != null) {
-            if(customClient == null) {
-                HttpBlade.DEFAULTS
+            if(customClientBuilder == null) {
+                customClientBuilder = nowClient.newBuilder();
+            }
+            customClientBuilder.proxy(Proxy.toJavaProxy(proxy));
+            if(proxy.hasAuth()) {
+                customClientBuilder.proxyAuthenticator(OkHttpClientImpl.createAuthenticator(proxy.getUsername(), proxy.getPassword()));
             }
         }
         return this;
@@ -128,6 +130,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl proxy(String host, int port) {
+        if(Utils.isNotEmpty(host)) {
+
+        }
         return this;
     }
 

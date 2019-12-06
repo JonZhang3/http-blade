@@ -2,7 +2,7 @@ package com.httpblade.common;
 
 import org.apache.http.client.methods.HttpRequestBase;
 
-public interface Constants {
+public interface Defaults {
 
     /**
      * 默认的连接超时时间

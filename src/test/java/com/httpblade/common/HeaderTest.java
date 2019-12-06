@@ -16,7 +16,7 @@ public class HeaderTest {
         Headers headers = new Headers();
         headers.set(HttpHeader.CONTENT_TYPE, ContentType.JSON);
         headers.add(HttpHeader.CONTENT_TYPE, ContentType.XML);
-        headers.set(HttpHeader.USER_AGENT, Constants.USER_AGENT_STRING);
+        headers.set(HttpHeader.USER_AGENT, Defaults.USER_AGENT_STRING);
         assertHeaders(headers);
 
         Map<String, List<String>> map = new HashMap<>();
@@ -28,7 +28,7 @@ public class HeaderTest {
         });
         map.put(HttpHeader.USER_AGENT, new ArrayList<String>(){
             {
-                add(Constants.USER_AGENT_STRING);
+                add(Defaults.USER_AGENT_STRING);
             }
         });
         headers = new Headers(map);
@@ -37,7 +37,7 @@ public class HeaderTest {
 
     private void assertHeaders(Headers headers) {
         assertEquals(ContentType.JSON, headers.get(HttpHeader.CONTENT_TYPE));
-        assertEquals(Constants.USER_AGENT_STRING, headers.get(HttpHeader.USER_AGENT));
+        assertEquals(Defaults.USER_AGENT_STRING, headers.get(HttpHeader.USER_AGENT));
         assertNull(headers.get(HttpHeader.CONTENT_ENCODING));
         List<String> values = headers.getList(HttpHeader.CONTENT_TYPE);
         assertEquals(2, values.size());

@@ -6,7 +6,7 @@ import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.Request;
 import com.httpblade.Response;
-import com.httpblade.common.Constants;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.task.AsyncTaskExecutor;
@@ -35,7 +35,7 @@ public class ApacheHttpClientImpl implements HttpClient {
 
     private final CloseableHttpClient client;
     private final RequestConfig requestConfig;
-    private long writeTimeout = Constants.WRITE_TIMEOUT;
+    private long writeTimeout = Defaults.WRITE_TIMEOUT;
     private Headers globalHeaders;
     private CookieHome cookieHome;
     private final HostnameVerifier hostnameVerifier;
@@ -46,10 +46,10 @@ public class ApacheHttpClientImpl implements HttpClient {
     public ApacheHttpClientImpl() {
         HttpClientBuilder clientBuilder = HttpClients.custom();
         requestConfig = RequestConfig.custom()
-            .setConnectTimeout(Constants.CONNECT_TIMEOUT)
-            .setSocketTimeout(Constants.READ_TIMEOUT)
+            .setConnectTimeout(Defaults.CONNECT_TIMEOUT)
+            .setSocketTimeout(Defaults.READ_TIMEOUT)
             .setRedirectsEnabled(true)
-            .setMaxRedirects(Constants.MAX_REDIRECT_COUNT)
+            .setMaxRedirects(Defaults.MAX_REDIRECT_COUNT)
             .build();
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.disableCookieManagement();

@@ -2,7 +2,7 @@ package com.httpblade.apachehttp;
 
 import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
-import com.httpblade.common.Constants;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;
@@ -22,7 +22,7 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.HttpClientBuil
 
     HttpClientBuilder clientBuilder;
     RequestConfig.Builder requestConfigBuilder;
-    long writeTimeout = Constants.WRITE_TIMEOUT;
+    long writeTimeout = Defaults.WRITE_TIMEOUT;
     Headers globalHeaders = new Headers();
     CookieHome cookieHome;
     Proxy proxy;
@@ -38,10 +38,10 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.HttpClientBuil
     private void setDefault() {
         clientBuilder.disableAutomaticRetries();
         clientBuilder.disableCookieManagement();
-        requestConfigBuilder.setConnectTimeout(Constants.CONNECT_TIMEOUT);
-        requestConfigBuilder.setSocketTimeout(Constants.READ_TIMEOUT);
+        requestConfigBuilder.setConnectTimeout(Defaults.CONNECT_TIMEOUT);
+        requestConfigBuilder.setSocketTimeout(Defaults.READ_TIMEOUT);
         requestConfigBuilder.setRedirectsEnabled(true);
-        requestConfigBuilder.setMaxRedirects(Constants.MAX_REDIRECT_COUNT);
+        requestConfigBuilder.setMaxRedirects(Defaults.MAX_REDIRECT_COUNT);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.httpblade;
 
-import com.httpblade.common.Constants;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
@@ -137,17 +137,23 @@ public final class HttpBlade {
         }
 
         public HttpBladeBuilder connectTimeout(long time, TimeUnit unit) {
-            this.connectTimeout = unit.toMillis(time);
+            if (time > 0) {
+                this.connectTimeout = unit.toMillis(time);
+            }
             return this;
         }
 
         public HttpBladeBuilder readTimeout(long time, TimeUnit unit) {
-            this.readTimeout = unit.toMillis(time);
+            if (time > 0) {
+                this.readTimeout = unit.toMillis(time);
+            }
             return this;
         }
 
         public HttpBladeBuilder writeTimeout(long time, TimeUnit unit) {
-            this.writeTimeout = unit.toMillis(time);
+            if (time > 0) {
+                this.writeTimeout = unit.toMillis(time);
+            }
             return this;
         }
 
@@ -182,12 +188,12 @@ public final class HttpBlade {
         }
 
         public HttpBladeBuilder setHeader(String name, String value) {
-            getHeaders(Constants.KEY_COMMON).set(name, value);
+            getHeaders(Defaults.KEY_COMMON).set(name, value);
             return this;
         }
 
         public HttpBladeBuilder addHeader(String name, String value) {
-            getHeaders(Constants.KEY_COMMON).add(name, value);
+            getHeaders(Defaults.KEY_COMMON).add(name, value);
             return this;
         }
 

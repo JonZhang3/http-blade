@@ -3,7 +3,7 @@ package com.httpblade.okhttp;
 import com.httpblade.CookieHome;
 import com.httpblade.base.HttpClient;
 import com.httpblade.HttpClientBuilder;
-import com.httpblade.common.Constants;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
@@ -33,12 +33,12 @@ public class OkHttpClientBuilderImpl implements HttpClientBuilder<OkHttpClientBu
     }
 
     private void setDefaults() {
-        connectTimeout(Constants.CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
-        readTimeout(Constants.READ_TIMEOUT, TimeUnit.MILLISECONDS);
-        writeTimeout(Constants.WRITE_TIMEOUT, TimeUnit.MILLISECONDS);
+        connectTimeout(Defaults.CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
+        readTimeout(Defaults.READ_TIMEOUT, TimeUnit.MILLISECONDS);
+        writeTimeout(Defaults.WRITE_TIMEOUT, TimeUnit.MILLISECONDS);
         builder.followRedirects(false);
         builder.followSslRedirects(false);
-        maxRedirectCount(Constants.MAX_REDIRECT_COUNT);
+        maxRedirectCount(Defaults.MAX_REDIRECT_COUNT);
     }
 
     @Override

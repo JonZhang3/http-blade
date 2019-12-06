@@ -8,6 +8,7 @@ import com.httpblade.common.*;
 import com.httpblade.common.form.Field;
 import com.httpblade.common.form.Form;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -35,6 +36,7 @@ class BaseHttpConnection {
     private int maxRedirectCount;
     private Headers headers = new Headers();
     private HostnameVerifier hostnameVerifier;
+    private SocketFactory socketFactory;
     private SSLSocketFactory ssf;
     private CookieHome cookieHome;
     private Form form;
