@@ -1,10 +1,15 @@
 package com.httpblade;
 
+import com.httpblade.common.Constants;
+import com.httpblade.common.Headers;
+import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class HttpBlade {
@@ -47,26 +52,6 @@ public final class HttpBlade {
         return Environment.nowUseClientType;
     }
 
-    /**
-     * 设置默认的全局 Http 客户端
-     *
-     * @param httpClient 自定义的全局 Http 客户端
-     */
-//    public static void setDefaultClient(HttpClient httpClient) {
-//        if (httpClient == null) {
-//            throw new NullPointerException("the parameter is null");
-//        }
-//        Environment.defaultClient = httpClient;
-//    }
-
-    /**
-     * 获取当前默认的全局 Http 客户端
-     *
-     * @return Http 客户端
-     */
-//    public static HttpClient defaultClient() {
-//        return Environment.defaultClient;
-//    }
     public static void setJsonParserFactory(JsonParserFactory parserFactory) {
         HttpBlade.jsonParserFactory = parserFactory;
     }
@@ -125,6 +110,7 @@ public final class HttpBlade {
 
     public static class HttpBladeBuilder {
 
+        private String baseUrl = "";
         private long connectTimeout;
         private long readTimeout;
         private long writeTimeout;
@@ -133,13 +119,21 @@ public final class HttpBlade {
         private CookieHome cookieHome;
         private SocketFactory socketFactory;
         private SSLSocketFactoryBuilder sslSocketFactoryBuilder;
+        private Map<String, Headers> globalHeaders = new LinkedHashMap<>();
 
         public HttpBladeBuilder() {
 
         }
 
-        public HttpBladeBuilder(HttpBlade httpBlade) {
+        HttpBladeBuilder(HttpBlade httpBlade) {
 
+        }
+
+        public HttpBladeBuilder baseUrl(String baseUrl) {
+            if (baseUrl != null) {
+                this.baseUrl = baseUrl;
+            }
+            return this;
         }
 
         public HttpBladeBuilder connectTimeout(long time, TimeUnit unit) {
@@ -187,8 +181,117 @@ public final class HttpBlade {
             return this;
         }
 
+        public HttpBladeBuilder setHeader(String name, String value) {
+            getHeaders(Constants.KEY_COMMON).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addHeader(String name, String value) {
+            getHeaders(Constants.KEY_COMMON).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setGetHeader(String name, String value) {
+            getHeaders(HttpMethod.GET.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addGetHeader(String name, String value) {
+            getHeaders(HttpMethod.GET.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setPostHeader(String name, String value) {
+            getHeaders(HttpMethod.POST.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addPostHeader(String name, String value) {
+            getHeaders(HttpMethod.POST.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setPutHeader(String name, String value) {
+            getHeaders(HttpMethod.PUT.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addPutHeader(String name, String value) {
+            getHeaders(HttpMethod.PUT.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setDeleteHeader(String name, String value) {
+            getHeaders(HttpMethod.DELETE.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addDeleteHeader(String name, String value) {
+            getHeaders(HttpMethod.DELETE.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setHeadHeader(String name, String value) {
+            getHeaders(HttpMethod.HEAD.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addHeadHeader(String name, String value) {
+            getHeaders(HttpMethod.HEAD.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setOptionsHeader(String name, String value) {
+            getHeaders(HttpMethod.OPTIONS.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addOptionsHeader(String name, String value) {
+            getHeaders(HttpMethod.OPTIONS.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setTraceHeader(String name, String value) {
+            getHeaders(HttpMethod.TRACE.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addTraceHeader(String name, String value) {
+            getHeaders(HttpMethod.TRACE.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setConnectHeader(String name, String value) {
+            getHeaders(HttpMethod.CONNECT.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addConnectHeader(String name, String value) {
+            getHeaders(HttpMethod.CONNECT.value()).add(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder setPatchHeader(String name, String value) {
+            getHeaders(HttpMethod.PATCH.value()).set(name, value);
+            return this;
+        }
+
+        public HttpBladeBuilder addPatchHeader(String name, String value) {
+            getHeaders(HttpMethod.PATCH.value()).add(name, value);
+            return this;
+        }
+
         public HttpBlade build() {
-            return null;
+            return new HttpBlade(this);
+        }
+
+        private Headers getHeaders(String key) {
+            Headers headers = this.globalHeaders.get(key);
+            if (headers == null) {
+                headers = new Headers();
+                this.globalHeaders.put(key, headers);
+            }
+            return headers;
         }
 
     }

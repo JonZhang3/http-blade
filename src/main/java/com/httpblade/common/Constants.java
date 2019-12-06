@@ -29,6 +29,8 @@ public interface Constants {
      */
     String USER_AGENT_STRING = "http-blade/1.0.0";
 
+    String KEY_COMMON = "COMMON";
+
     static void setDefaultHeaders(Headers headers) {
         headers.set(HttpHeader.USER_AGENT, USER_AGENT_STRING);
         headers.set(HttpHeader.ACCEPT, "*/*");

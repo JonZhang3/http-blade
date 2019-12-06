@@ -34,20 +34,20 @@ public abstract class HttpClient {
      *
      * @return 连接超时时间，单位：毫秒
      */
-    abstract long connectTimeout();
+    public abstract long connectTimeout();
 
-    abstract long readTimeout();
+    public abstract long readTimeout();
 
-    abstract long writeTimeout();
+    public abstract long writeTimeout();
 
-    abstract int maxRedirectCount();
+    public abstract int maxRedirectCount();
 
-    abstract CookieHome cookieHome();
+    public abstract CookieHome cookieHome();
 
-    abstract HostnameVerifier hostnameVerifier();
+    public abstract HostnameVerifier hostnameVerifier();
 
-    abstract SSLSocketFactory sslSocketFactory();
+    public abstract SSLSocketFactory sslSocketFactory();
 
-    abstract Proxy proxy();
+    public abstract Proxy proxy();
 
 }
