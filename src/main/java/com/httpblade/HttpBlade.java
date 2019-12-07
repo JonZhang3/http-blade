@@ -8,6 +8,7 @@ import com.httpblade.common.SSLSocketFactoryBuilder;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -34,10 +35,6 @@ public final class HttpBlade {
 
     public static final HttpBlade INSTANCE = new HttpBlade();
 
-    public static Builder create() {
-        return new Builder();
-    }
-
     private HttpClient client;
 
     private HttpBlade() {
@@ -45,11 +42,9 @@ public final class HttpBlade {
     }
 
     HttpBlade(Builder builder) {
-
-    }
-
-    public static int nowClientType() {
-        return Environment.nowUseClientType;
+        this.client = Environment.createClient(builder.clientType, builder.baseUrl, builder.connectTimeout,
+            builder.readTimeout, builder.writeTimeout, builder.maxRedirectCount, builder.cookieHome,
+            builder.hostnameVerifier, builder.proxy, builder.socketFactory, builder.globalHeaders);
     }
 
     public static void setJsonParserFactory(JsonParserFactory parserFactory) {
@@ -108,12 +103,18 @@ public final class HttpBlade {
         return new Builder(this);
     }
 
+    public Builder newBuilder(int clientType) {
+        return new Builder(clientType, this);
+    }
+
     public static class Builder {
 
+        private int clientType = Environment.CLIENT_TYPE_DEFAULT;
         private String baseUrl = "";
-        private long connectTimeout;
-        private long readTimeout;
-        private long writeTimeout;
+        private long connectTimeout = Defaults.CONNECT_TIMEOUT;
+        private long readTimeout = Defaults.READ_TIMEOUT;
+        private long writeTimeout = Defaults.WRITE_TIMEOUT;
+        private int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
         private Proxy proxy;
         private HostnameVerifier hostnameVerifier;
         private CookieHome cookieHome;
@@ -122,16 +123,35 @@ public final class HttpBlade {
         private Map<String, Headers> globalHeaders = new LinkedHashMap<>();
 
         public Builder() {
+        }
 
+        public Builder(int clientType) {
+            this.clientType = clientType;
+        }
+
+        Builder(int clientType, HttpBlade httpBlade) {
+            this(httpBlade);
+            this.clientType = clientType;
         }
 
         Builder(HttpBlade httpBlade) {
+            HttpClient client = httpBlade.client;
+            this.baseUrl = client.baseUrl;
+            this.connectTimeout = client.connectTimeout;
+            this.readTimeout = client.readTimeout;
+            this.writeTimeout = client.writeTimeout;
+            this.proxy = client.proxy;
+            this.hostnameVerifier = client.hostnameVerifier;
+            this.cookieHome = client.cookieHome;
+            this.socketFactory = client.socketFactory;
 
+            this.globalHeaders = new HashMap<>();
+            this.globalHeaders.putAll(client.globalHeaders);
         }
 
         public Builder baseUrl(String baseUrl) {
             if (baseUrl != null) {
-                if(baseUrl.charAt(baseUrl.length() - 1) == '/') {
+                if (baseUrl.charAt(baseUrl.length() - 1) == '/') {
                     // TODO substring方法的性能问题，与 toCharArray 比较
                     this.baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
                 } else {
@@ -159,6 +179,11 @@ public final class HttpBlade {
             if (time > 0) {
                 this.writeTimeout = unit.toMillis(time);
             }
+            return this;
+        }
+
+        public Builder maxRedirectCount(int maxCount) {
+            this.maxRedirectCount = maxCount;
             return this;
         }
 

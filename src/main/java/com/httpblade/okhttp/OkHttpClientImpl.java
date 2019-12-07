@@ -2,7 +2,6 @@ package com.httpblade.okhttp;
 
 import com.httpblade.CookieHome;
 import com.httpblade.HttpClient;
-import com.httpblade.Request;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
@@ -22,7 +21,7 @@ public class OkHttpClientImpl extends HttpClient {
 
     private OkHttpClient client;
 
-    OkHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
+    public OkHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
                             int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
                             Proxy proxy, SocketFactory socketFactory, Map<String, Headers> globalHeaders) {
         super(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount, cookieHome, hostnameVerifier,
@@ -53,38 +52,6 @@ public class OkHttpClientImpl extends HttpClient {
             builder.socketFactory(socketFactory);
         }
         this.client = builder.build();
-    }
-
-    @Override
-    public com.httpblade.Response request(Request request) {
-        OkHttpRequestImpl requestImpl = (OkHttpRequestImpl) request;
-//        try {
-//            Response response = client.newCall(requestImpl.build(this.globalHeaders)).execute();
-//            return new OkHttpResponseImpl(response);
-//        } catch (IOException e) {
-//            throw new HttpBladeException(e);
-//        }
-        return null;
-    }
-
-    @Override
-    public void requestAsync(Request request, com.httpblade.Callback callback) {
-//        OkHttpRequestImpl requestImpl = (OkHttpRequestImpl) request;
-//        client.newCall(requestImpl.build(this.globalHeaders)).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                if (callback != null) {
-//                    callback.error(e);
-//                }
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                if (callback != null) {
-//                    callback.success(new OkHttpResponseImpl(response));
-//                }
-//            }
-//        });
     }
 
     @Override

@@ -46,21 +46,6 @@ public abstract class HttpClient {
         this.globalHeaders = globalHeaders;
     }
 
-    /**
-     * 同步发起请求
-     *
-     * @param request Http 请求
-     * @return 响应内容
-     */
-    public abstract Response request(Request request);
-
-    /**
-     * 异步发起请求
-     *
-     * @param request Http 请求
-     */
-    public abstract void requestAsync(Request request, Callback callback);
-
     public abstract Object raw();
 
     public String baseUrl() {

@@ -1,7 +1,6 @@
 package com.httpblade.apachehttp;
 
 import com.httpblade.CookieHome;
-import com.httpblade.base.HttpClient;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;
 import com.httpblade.common.Headers;
@@ -88,6 +87,7 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.HttpClientBuil
     @Override
     public ApacheHttpClientBuilderImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
         clientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+        clientBuilder.setHostnameVerifier()
         this.hostnameVerifier = hostnameVerifier;
         return this;
     }

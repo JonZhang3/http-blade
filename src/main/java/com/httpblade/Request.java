@@ -136,12 +136,6 @@ public interface Request<T extends Request> {
      */
     T maxRedirectCount(int maxCount);
 
-    T hostnameVerifier(HostnameVerifier hostnameVerifier);
-
-    T socketFactory(SocketFactory socketFactory);
-
-    T sslSocketFactory(SSLSocketFactoryBuilder builder);
-
     Response request();
 
     void requestAsync(Callback callback);

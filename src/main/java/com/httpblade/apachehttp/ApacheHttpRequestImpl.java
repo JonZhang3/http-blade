@@ -1,13 +1,18 @@
 package com.httpblade.apachehttp;
 
+import com.httpblade.Callback;
 import com.httpblade.HttpBladeException;
 import com.httpblade.AbstractRequest;
 import com.httpblade.Cookie;
 import com.httpblade.CookieHome;
+import com.httpblade.HttpClient;
+import com.httpblade.Response;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
+import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLSocketFactoryBuilder;
 import com.httpblade.common.Utils;
 import com.httpblade.common.form.Field;
 import com.httpblade.common.form.Form;
@@ -18,7 +23,10 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,14 +35,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl> {
 
     private HttpMethod method;
     private String url;
     private HttpEntityRequestImpl request = new HttpEntityRequestImpl();
+    private final CloseableHttpClient nowClient;
 
-    public ApacheHttpRequestImpl() {
+    public ApacheHttpRequestImpl(final HttpClient client) {
+        super(client);
+        nowClient = (CloseableHttpClient) client.raw();
+
         Defaults.setDefaultHeaders(request);
     }
 
@@ -127,6 +140,51 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         }
         url = url.replaceAll("\\{ + name + \\}", value);
         return this;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl proxy(Proxy proxy) {
+        return null;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl proxy(String host, int port) {
+        return null;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl proxy(String host, int port, String username, String password) {
+        return null;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl connectTimeout(long time, TimeUnit unit) {
+        return null;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl readTimeout(long time, TimeUnit unit) {
+        return null;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl writeTimeout(long time, TimeUnit unit) {
+        return null;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl maxRedirectCount(int maxCount) {
+        return null;
+    }
+
+    @Override
+    public Response request() {
+        return null;
+    }
+
+    @Override
+    public void requestAsync(Callback callback) {
+
     }
 
     @Override

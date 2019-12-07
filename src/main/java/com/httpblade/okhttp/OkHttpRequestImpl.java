@@ -9,16 +9,16 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
 import com.httpblade.common.Utils;
+import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.HostnameVerifier;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -44,18 +44,19 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     @Override
     public OkHttpRequestImpl url(String url) {
         String resultUrl = url;
-        if(!url.startsWith("http")) {
-            if(Utils.isEmpty(client.baseUrl())) {
+        if (!url.startsWith("http")) {
+            if (Utils.isEmpty(client.baseUrl())) {
                 throw new HttpBladeException("the url not an http url, and you not provide a base url.");
             }
             resultUrl = client.baseUrl();
+            if (url.charAt(0) != '/') {
+                resultUrl += '/';
+            }
+            resultUrl += url;
         }
-        this.url = HttpUrl.parse(url);
+        this.url = HttpUrl.parse(resultUrl);
         if (this.url == null) {
-            throw new HttpBladeException("the url is null or error");
-        }
-        if(!url.startsWith("http")) {
-
+            throw new HttpBladeException("the url is error");
         }
         this.path = this.url.encodedPath();
         return this;
@@ -127,13 +128,14 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl proxy(Proxy proxy) {
-        if(customClientBuilder == null) {
+        if (customClientBuilder == null) {
             customClientBuilder = nowClient.newBuilder();
         }
-        if(proxy != null) {
+        if (proxy != null) {
             customClientBuilder.proxy(Proxy.toJavaProxy(proxy));
-            if(proxy.hasAuth()) {
-                customClientBuilder.proxyAuthenticator(OkHttpClientImpl.createAuthenticator(proxy.getUsername(), proxy.getPassword()));
+            if (proxy.hasAuth()) {
+                customClientBuilder.proxyAuthenticator(OkHttpClientImpl.createAuthenticator(proxy.getUsername(),
+                    proxy.getPassword()));
             }
         } else {
             customClientBuilder.proxy(null);
@@ -143,10 +145,10 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl proxy(String host, int port) {
-        if(customClientBuilder == null) {
+        if (customClientBuilder == null) {
             customClientBuilder = nowClient.newBuilder();
         }
-        if(Utils.isNotEmpty(host)) {
+        if (Utils.isNotEmpty(host)) {
             customClientBuilder.proxy(Proxy.toJavaProxy(new Proxy(host, port)));
         } else {
             customClientBuilder.proxy(null);
@@ -156,13 +158,13 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl proxy(String host, int port, String username, String password) {
-        if(customClientBuilder == null) {
+        if (customClientBuilder == null) {
             customClientBuilder = nowClient.newBuilder();
         }
-        if(Utils.isNotEmpty(host)) {
+        if (Utils.isNotEmpty(host)) {
             Proxy proxy = new Proxy(host, port, username, password);
             customClientBuilder.proxy(Proxy.toJavaProxy(proxy));
-            if(proxy.hasAuth()) {
+            if (proxy.hasAuth()) {
                 customClientBuilder.proxyAuthenticator(OkHttpClientImpl.createAuthenticator(username, password));
             }
         } else {
@@ -173,8 +175,8 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl connectTimeout(long time, TimeUnit unit) {
-        if(time >= 0) {
-            if(customClientBuilder == null) {
+        if (time >= 0) {
+            if (customClientBuilder == null) {
                 customClientBuilder = nowClient.newBuilder();
             }
             customClientBuilder.connectTimeout(time, unit);
@@ -184,8 +186,8 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl readTimeout(long time, TimeUnit unit) {
-        if(time >= 0) {
-            if(customClientBuilder == null) {
+        if (time >= 0) {
+            if (customClientBuilder == null) {
                 customClientBuilder = nowClient.newBuilder();
             }
             customClientBuilder.readTimeout(time, unit);
@@ -195,8 +197,8 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl writeTimeout(long time, TimeUnit unit) {
-        if(time >= 0) {
-            if(customClientBuilder == null) {
+        if (time >= 0) {
+            if (customClientBuilder == null) {
                 customClientBuilder = nowClient.newBuilder();
             }
             customClientBuilder.writeTimeout(time, unit);
@@ -206,34 +208,14 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl maxRedirectCount(int maxCount) {
-
-        return this;
-    }
-
-    @Override
-    public OkHttpRequestImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
-        if(customClientBuilder == null) {
-            customClientBuilder = nowClient.newBuilder();
+        if (maxCount > 0) {
+            if (customClientBuilder == null) {
+                customClientBuilder = nowClient.newBuilder();
+            }
+            List<Interceptor> interceptors = customClientBuilder.interceptors();
+            interceptors.removeIf(interceptor -> interceptor.getClass().equals(RedirectInterceptor.class));
+            customClientBuilder.addInterceptor(new RedirectInterceptor(maxCount));
         }
-        customClientBuilder.hostnameVerifier(hostnameVerifier);
-        return this;
-    }
-
-    @Override
-    public OkHttpRequestImpl socketFactory(SocketFactory socketFactory) {
-        if(customClientBuilder == null) {
-            customClientBuilder = nowClient.newBuilder();
-        }
-        customClientBuilder.socketFactory(socketFactory);
-        return this;
-    }
-
-    @Override
-    public OkHttpRequestImpl sslSocketFactory(SSLSocketFactoryBuilder builder) {
-        if(customClientBuilder == null) {
-            customClientBuilder = nowClient.newBuilder();
-        }
-
         return this;
     }
 
@@ -249,17 +231,38 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public Response request() {
-
-        return null;
+        OkHttpClient client = buildClient();
+        Request request = this.build();
+        try {
+            return new OkHttpResponseImpl(client.newCall(request).execute());
+        } catch (IOException e) {
+            throw new HttpBladeException(e);
+        }
     }
 
     @Override
-    public void requestAsync(Callback callback) {
+    public void requestAsync(final Callback callback) {
+        OkHttpClient client = buildClient();
+        Request request = this.build();
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if(callback != null) {
+                    callback.error(e);
+                }
+            }
 
+            @Override
+            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                if(callback != null) {
+                    callback.success(new OkHttpResponseImpl(response));
+                }
+            }
+        });
     }
 
     private OkHttpClient buildClient() {
-        if(customClientBuilder != null) {
+        if (customClientBuilder != null) {
             return customClientBuilder.build();
         }
         return nowClient;
@@ -303,11 +306,11 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             }
         };
         com.httpblade.common.Headers commonHeaders = this.client.headers();
-        if(commonHeaders != null) {
+        if (commonHeaders != null) {
             commonHeaders.forEach(action);
         }
         com.httpblade.common.Headers methodHeaders = this.client.headers(this.method.value());
-        if(methodHeaders != null) {
+        if (methodHeaders != null) {
             methodHeaders.forEach(action);
         }
         this.headers.forEach(action);

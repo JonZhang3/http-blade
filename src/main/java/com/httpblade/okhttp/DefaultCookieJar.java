@@ -37,12 +37,13 @@ class DefaultCookieJar implements CookieJar {
         List<Cookie> cookies = new LinkedList<>();
         if (baseCookies != null) {
             for (com.httpblade.Cookie baseCookie : baseCookies) {
-                Cookie.Builder builder = new Cookie.Builder()
-                    .name(baseCookie.name())
-                    .value(baseCookie.value())
-                    .expiresAt(baseCookie.expiresAt())
-                    .domain(baseCookie.domain())
-                    .path(baseCookie.path());
+                Cookie.Builder builder =
+                    new Cookie.Builder()
+                        .name(baseCookie.name())
+                        .value(baseCookie.value())
+                        .expiresAt(baseCookie.expiresAt())
+                        .domain(baseCookie.domain())
+                        .path(baseCookie.path());
                 if (baseCookie.secure()) {
                     builder.secure();
                 }
