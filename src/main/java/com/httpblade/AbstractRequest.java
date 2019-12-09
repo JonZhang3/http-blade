@@ -30,6 +30,9 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
     }
 
     protected String configUrl(String url) {
+        if (url == null) {
+            throw new HttpBladeException("the url is null.");
+        }
         String resultUrl = url;
         if (!url.startsWith("http")) {
             if (Utils.isEmpty(client.baseUrl())) {
@@ -125,16 +128,6 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
     public T contentLength(long length) {
         this.setHeader(HttpHeader.CONTENT_LENGTH, length + "");
         return (T) this;
-    }
-
-    @Override
-    public T queryString(String name, String value) {
-        return form(name, value);
-    }
-
-    @Override
-    public T queryString(String name, String value, boolean encoded) {
-        return formEncoded(name, value);
     }
 
     @Override

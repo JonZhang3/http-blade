@@ -27,8 +27,7 @@ class BaseHttpConnection {
     private static final int DEFAULT_CHUNK_LENGTH = 1024 * 2;
 
     private HttpURLConnection conn;
-    private HttpUrl httpUrl;
-    private URL url;
+    private HttpUrl url;
     private HttpMethod method;
     private Proxy proxy;
     private int connectTimeout;
@@ -45,7 +44,7 @@ class BaseHttpConnection {
     private boolean requiresRequestBody = false;
 
     BaseHttpConnection setUrl(HttpUrl url) {
-        this.httpUrl = url;
+        this.url = url;
         return this;
     }
 
@@ -119,16 +118,22 @@ class BaseHttpConnection {
     }
 
     URL getUrl() {
-        return this.url;
+        return this.url.url();
+    }
+
+    void close() {
+        if (conn != null) {
+            conn.disconnect();
+        }
     }
 
     Response execute() throws IOException {
         String contentType = this.headers.get(HttpHeader.CONTENT_TYPE);
-        if (!requiresRequestBody) {
-            addParameter(httpUrl, form, charset.name());
-        } else if (body != null) {
+        if (!requiresRequestBody) {// 不允许请求体
+            addParameter(url, form, charset.name());
+        } else if (body != null) {// 允许请求体的情况下
             if (form.onlyNormalField()) {
-                addParameter(httpUrl, form, charset.name());
+                addParameter(url, form, charset.name());
             } else {
                 throw new HttpBladeException("You have provided the request body for the request.");
             }
@@ -136,7 +141,6 @@ class BaseHttpConnection {
         } else {
             this.headers.set(HttpHeader.CONTENT_TYPE, form.contentType());
         }
-        this.url = httpUrl.toURL();
         return innerExecute(1);
     }
 
@@ -168,7 +172,7 @@ class BaseHttpConnection {
         if (this.conn != null) {
             this.conn.disconnect();
         }
-        conn = openConnection(this.url, this.proxy);
+        conn = openConnection(getUrl(), this.proxy);
         conn.setUseCaches(false);
         conn.setRequestMethod(method.value());
         conn.setInstanceFollowRedirects(this.maxRedirectCount >= 1);
@@ -182,14 +186,14 @@ class BaseHttpConnection {
         conn.setReadTimeout(readTimeout);
         configHttps(conn, this.hostnameVerifier, this.ssf);
         addHeaders(conn, headers);
-        addCookie(conn, this.url, this.cookieHome);
+        addCookie(conn, getUrl(), this.cookieHome);
     }
 
     private void connect() throws IOException {
         if (conn == null) {
             throw new NullPointerException("the http connection is null");
         }
-        if (HttpMethod.requiresRequestBody(method)) {
+        if (requiresRequestBody) {
             OutputStream out = conn.getOutputStream();
             if (body != null) {
                 body.writeTo(out, charset);
@@ -200,12 +204,6 @@ class BaseHttpConnection {
             //out.close();
         } else {
             conn.connect();
-        }
-    }
-
-    void close() {
-        if (conn != null) {
-            conn.disconnect();
         }
     }
 
@@ -221,11 +219,11 @@ class BaseHttpConnection {
         for (Field field : form.fields()) {
             String name = field.name();
             String value = field.value();
-            if(!field.encoded()) {
+            if (!field.encoded()) {
                 name = Utils.encode(name, charset);
                 value = Utils.encode(value, charset);
             }
-            url.addQuery(name, value);
+            url.getQueries().add(name, value);
         }
     }
 
@@ -277,8 +275,8 @@ class BaseHttpConnection {
 
     private static String getContentType(Body body, String contentType) {
         String result = contentType;
-        if(result == null) {
-            if(body.getContentType() != null) {
+        if (result == null) {
+            if (body.getContentType() != null) {
                 result = body.getContentType();
             } else {
                 if (body.isString()) {

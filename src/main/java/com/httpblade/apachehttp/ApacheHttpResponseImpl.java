@@ -199,7 +199,7 @@ public final class ApacheHttpResponseImpl implements Response {
     public List<Date> dateHeaders(String name) {
         Header[] headers = response.getHeaders(name);
         List<Date> result = new LinkedList<>();
-        if(headers != null) {
+        if (headers != null) {
             for (Header header : headers) {
                 result.add(Utils.parseHttpDate(header.getValue()));
             }

@@ -12,13 +12,13 @@ import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
 import com.httpblade.common.Utils;
 import com.httpblade.common.form.Field;
 import com.httpblade.common.form.Form;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -26,8 +26,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.HostnameVerifier;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,28 +39,26 @@ import java.util.concurrent.TimeUnit;
 
 public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl> {
 
+    private URI uri = null;
     private HttpMethod method;
-    private URL url;
-    private String path;
+    private URIBuilder uriBuilder;
     private HttpEntityRequestImpl request = new HttpEntityRequestImpl();
-    private final CloseableHttpClient nowClient;
-    private RequestConfig requestConfig;
+    private RequestConfig.Builder requestConfigBuilder;
+    private CloseableHttpClient rawClient;
 
     public ApacheHttpRequestImpl(final HttpClient client) {
         super(client);
-        nowClient = (CloseableHttpClient) client.raw();
+        rawClient = (CloseableHttpClient) client.raw();
         Defaults.setDefaultHeaders(request);
+        setHeaders(request, client.headers());
     }
 
     @Override
     public ApacheHttpRequestImpl url(final String url) {
-        if (url == null) {
-            throw new HttpBladeException("the url is null.");
-        }
         String resultUrl = this.configUrl(url);
         try {
-            this.url = new URL(resultUrl);
-        } catch (MalformedURLException e) {
+            this.uriBuilder = new URIBuilder(resultUrl);
+        } catch (URISyntaxException e) {
             throw new HttpBladeException(e);
         }
         return this;
@@ -71,6 +68,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     public ApacheHttpRequestImpl method(HttpMethod method) {
         this.method = method;
         request.setMethod(method);
+        setHeaders(request, client.headers(method.name()));
         return this;
     }
 
@@ -142,65 +140,119 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public ApacheHttpRequestImpl pathVariable(String name, String value) {
-        this.path = this.url.getPath();
-        if(this.path == null) {
-            this.path = "/";
+        String path = uriBuilder.getPath();
+        if (path == null) {
+            path = "/";
         }
-        path = path.replaceAll("\\{ + name + \\}", value);
+        uriBuilder.setPath(path.replaceAll("\\{ + name + \\}", Utils.encode(value, "UTF-8")));
+        return this;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl queryString(String name, String value) {
+        uriBuilder.addParameter(name, value);
+        return this;
+    }
+
+    @Override
+    public ApacheHttpRequestImpl queryString(String name, String value, boolean encoded) {
+        uriBuilder.addParameter(name, value);
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl proxy(Proxy proxy) {
+        if (requestConfigBuilder == null) {
+            requestConfigBuilder = RequestConfig.custom();
+        }
+        if (proxy != null) {
+            requestConfigBuilder.setProxy(new HttpHost(proxy.getHost(), proxy.getPort()));
+            if (proxy.hasAuth()) {
+
+            }
+        }
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl proxy(String host, int port) {
-        return null;
+        if (requestConfigBuilder == null) {
+            requestConfigBuilder = RequestConfig.custom();
+        }
+        if (Utils.isNotEmpty(host)) {
+            requestConfigBuilder.setProxy(new HttpHost(host, port));
+        }
+        return this;
     }
 
     @Override
     public ApacheHttpRequestImpl proxy(String host, int port, String username, String password) {
-        return null;
+        if (requestConfigBuilder == null) {
+            requestConfigBuilder = RequestConfig.custom();
+        }
+        Proxy proxy = new Proxy(host, port, username, password);
+        requestConfigBuilder.setProxy(new HttpHost(host, port));
+        if (proxy.hasAuth()) {
+
+        }
+        return this;
     }
 
     @Override
     public ApacheHttpRequestImpl connectTimeout(long time, TimeUnit unit) {
-        return null;
+        if (requestConfigBuilder == null) {
+            requestConfigBuilder = RequestConfig.custom();
+        }
+        requestConfigBuilder.setConnectTimeout((int) unit.toMillis(time));
+        return this;
     }
 
     @Override
     public ApacheHttpRequestImpl readTimeout(long time, TimeUnit unit) {
-        return null;
+        if (requestConfigBuilder == null) {
+            requestConfigBuilder = RequestConfig.custom();
+        }
+        requestConfigBuilder.setSocketTimeout((int) unit.toMillis(time));
+        return this;
     }
 
     @Override
     public ApacheHttpRequestImpl writeTimeout(long time, TimeUnit unit) {
-        return null;
+        return this;
     }
 
     @Override
     public ApacheHttpRequestImpl maxRedirectCount(int maxCount) {
-        return null;
+        if (requestConfigBuilder == null) {
+            requestConfigBuilder = RequestConfig.custom();
+        }
+        requestConfigBuilder.setMaxRedirects(maxCount);
+        return this;
     }
 
     @Override
     public Response request() {
-        return null;
+        build();
+        try {
+            return new ApacheHttpResponseImpl(rawClient.execute(request), uri.toURL(), client.cookieHome());
+        } catch (IOException e) {
+            throw new HttpBladeException(e);
+        }
     }
 
     @Override
     public void requestAsync(Callback callback) {
-
+        build();
+        // TODO
     }
 
     @Override
     public URL getUrl() {
-        if(path != null) {
-
+        try {
+            return uriBuilder.build().toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new HttpBladeException();
         }
-        return null;
     }
 
     @Override
@@ -208,18 +260,14 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         return this.method;
     }
 
-    HttpUriRequest build(Headers globalHeaders, CookieHome cookieHome) {
+    void build() {
         if (method == null) {
             throw new HttpBladeException("must specify a http method");
         }
-        if (url == null) {
-            throw new HttpBladeException("must specify a http url");
-        }
         String contentType = this.header(HttpHeader.CONTENT_TYPE);
-        URI uri = URI.create(url);
+        uriBuilder.setCharset(charset);
         HttpEntity entity = null;
         if (!HttpMethod.requiresRequestBody(this.method)) {
-            URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
             addParameter(uriBuilder, this.form, this.charset.name());
             try {
                 uri = uriBuilder.build();
@@ -229,7 +277,6 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         } else if (body != null) {
             entity = this.body.createApacheHttpEntity(contentType, charset);
             if (this.form.onlyNormalField()) {
-                URIBuilder uriBuilder = new URIBuilder(uri).setCharset(this.charset);
                 addParameter(uriBuilder, this.form, this.charset.name());
                 try {
                     uri = uriBuilder.build();
@@ -241,15 +288,18 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
             }
         } else {
             entity = new MultipartFormEntity(form, charset);
+            try {
+                uri = uriBuilder.build();
+            } catch (URISyntaxException ignore) {
+                // It shouldn't happen.
+            }
         }
 
         if (entity != null) {
             request.setEntity(entity);
         }
         request.setURI(uri);
-        setGlobalHeaders(request, globalHeaders);
-        addCookie(request, cookieHome);
-        return request;
+        addCookie(request, client.cookieHome());
     }
 
     private static void addParameter(URIBuilder uriBuilder, Form form, String charset) {
@@ -265,12 +315,9 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         }
     }
 
-    private static void setGlobalHeaders(HttpRequestBase request, Headers globalHeaders) {
-        if (globalHeaders != null) {
-            globalHeaders.forEach((name, values) -> {
-                if (request.containsHeader(name)) {
-                    return;
-                }
+    private static void setHeaders(HttpRequestBase request, Headers headers) {
+        if (headers != null) {
+            headers.forEach((name, values) -> {
                 if (values.size() == 1) {
                     request.setHeader(name, values.get(0));
                 } else {

@@ -6,7 +6,6 @@ import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,13 +37,13 @@ public final class HttpBlade {
     private HttpClient client;
 
     private HttpBlade() {
-        client = Environment.defaultClient;
+        client = Environment.createDefaultClient();
     }
 
     HttpBlade(Builder builder) {
         this.client = Environment.createClient(builder.clientType, builder.baseUrl, builder.connectTimeout,
             builder.readTimeout, builder.writeTimeout, builder.maxRedirectCount, builder.cookieHome,
-            builder.hostnameVerifier, builder.proxy, builder.socketFactory, builder.globalHeaders);
+            builder.hostnameVerifier, builder.proxy, builder.globalHeaders);
     }
 
     public static void setJsonParserFactory(JsonParserFactory parserFactory) {
@@ -64,39 +63,39 @@ public final class HttpBlade {
     }
 
     public Request get(String url) {
-        return Environment.newRequest().get(url);
+        return Environment.newRequest(client).get(url);
     }
 
     public Request post(String url) {
-        return Environment.newRequest().post(url);
+        return Environment.newRequest(client).post(url);
     }
 
     public Request put(String url) {
-        return Environment.newRequest().put(url);
+        return Environment.newRequest(client).put(url);
     }
 
     public Request delete(String url) {
-        return Environment.newRequest().delete(url);
+        return Environment.newRequest(client).delete(url);
     }
 
     public Request head(String url) {
-        return Environment.newRequest().head(url);
+        return Environment.newRequest(client).head(url);
     }
 
     public Request options(String url) {
-        return Environment.newRequest().options(url);
+        return Environment.newRequest(client).options(url);
     }
 
     public Request trace(String url) {
-        return Environment.newRequest().trace(url);
+        return Environment.newRequest(client).trace(url);
     }
 
     public Request connect(String url) {
-        return Environment.newRequest().connect(url);
+        return Environment.newRequest(client).connect(url);
     }
 
     public Request patch(String url) {
-        return Environment.newRequest().patch(url);
+        return Environment.newRequest(client).patch(url);
     }
 
     public Builder newBuilder() {
@@ -118,7 +117,6 @@ public final class HttpBlade {
         private Proxy proxy;
         private HostnameVerifier hostnameVerifier;
         private CookieHome cookieHome;
-        private SocketFactory socketFactory;
         private SSLSocketFactoryBuilder sslSocketFactoryBuilder;
         private Map<String, Headers> globalHeaders = new LinkedHashMap<>();
 
@@ -136,6 +134,7 @@ public final class HttpBlade {
 
         Builder(HttpBlade httpBlade) {
             HttpClient client = httpBlade.client;
+            this.clientType = client.clientType();
             this.baseUrl = client.baseUrl;
             this.connectTimeout = client.connectTimeout;
             this.readTimeout = client.readTimeout;
@@ -143,8 +142,6 @@ public final class HttpBlade {
             this.proxy = client.proxy;
             this.hostnameVerifier = client.hostnameVerifier;
             this.cookieHome = client.cookieHome;
-            this.socketFactory = client.socketFactory;
-
             this.globalHeaders = new HashMap<>();
             this.globalHeaders.putAll(client.globalHeaders);
         }
@@ -204,11 +201,6 @@ public final class HttpBlade {
 
         public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
             this.hostnameVerifier = hostnameVerifier;
-            return this;
-        }
-
-        public Builder socketFactory(SocketFactory socketFactory) {
-            this.socketFactory = socketFactory;
             return this;
         }
 

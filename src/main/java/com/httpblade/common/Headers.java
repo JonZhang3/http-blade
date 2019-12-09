@@ -2,7 +2,6 @@ package com.httpblade.common;
 
 import com.httpblade.HttpBlade;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -115,10 +114,8 @@ public final class Headers {
     }
 
     private static void checkNameAndValue(String name, String value) {
-        if (HttpBlade.nowClientType() != HttpBlade.CLIENT_TYPE_OKHTTP) {
-            checkName(name);
-            checkValue(name, value);
-        }
+        checkName(name);
+        checkValue(name, value);
     }
 
     private static void checkName(String name) {

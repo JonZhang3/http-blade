@@ -1,7 +1,9 @@
 package com.httpblade.okhttp;
 
 import com.httpblade.CookieHome;
+import com.httpblade.HttpBlade;
 import com.httpblade.HttpClient;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
@@ -12,13 +14,19 @@ import okhttp3.OkHttpClient;
 
 import javax.net.ssl.HostnameVerifier;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class OkHttpClientImpl extends HttpClient {
 
-    private OkHttpClient client;
+    private final OkHttpClient client;
+
+    public OkHttpClientImpl() {
+        this("", Defaults.CONNECT_TIMEOUT, Defaults.READ_TIMEOUT, Defaults.WRITE_TIMEOUT, Defaults.MAX_REDIRECT_COUNT
+            , null, null, null, new HashMap<>());
+    }
 
     public OkHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
                             int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
@@ -53,6 +61,11 @@ public class OkHttpClientImpl extends HttpClient {
     @Override
     public Object raw() {
         return client;
+    }
+
+    @Override
+    public int clientType() {
+        return HttpBlade.CLIENT_TYPE_OKHTTP;
     }
 
     @Override

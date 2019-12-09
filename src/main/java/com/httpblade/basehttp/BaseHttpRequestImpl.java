@@ -7,51 +7,38 @@ import com.httpblade.HttpClient;
 import com.httpblade.Response;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
-import com.httpblade.common.HttpUrl;
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
 import com.httpblade.common.Utils;
+import com.httpblade.common.task.AsyncTaskExecutor;
+import com.httpblade.common.task.Task;
 
-import javax.net.ssl.HostnameVerifier;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
-    private HttpUrl httpUrl;
+    private static AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
+
     private HttpMethod method;
-    private URL url;
-    private String path;
-    private String queryString;
-    private Map<String, List<String>> queries = new HashMap<>();
+    private HttpUrl url;
     private BaseHttpConnection connection = new BaseHttpConnection();
 
     public BaseHttpRequestImpl(HttpClient client) {
         super(client);
-        connection.setProxy(Proxy.toJavaProxy(client.proxy()));
-        connection.setHostnameVerifier(client.hostnameVerifier());
-
+        connection.setHostnameVerifier(client.hostnameVerifier()).setConnectTimeout((int) client.connectTimeout()).setReadTimeout((int) client.readTimeout()).setCookieHome(client.cookieHome()).setMaxRedirectCount(client.maxRedirectCount());
     }
 
     @Override
     public BaseHttpRequestImpl url(String url) {
-        this.httpUrl = new HttpUrl(url);
+        String resultUrl = this.configUrl(url);
         try {
-            this.url = new URL(url);
-            this.path = this.url.getPath();
-            if(this.path == null) {
-                this.path = "/";
-            }
-            this.queryString = this.url.getQuery();
-            if(this.queryString == null) {
-                this.queryString = "";
-            }
-            Utils.parseQueryString(queryString, queries);
+            this.url = new HttpUrl(resultUrl);
         } catch (MalformedURLException e) {
             throw new HttpBladeException(e);
         }
@@ -122,70 +109,109 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     @Override
     public BaseHttpRequestImpl pathVariable(String name, String value) {
-        //httpUrl.setPathVariable(name, value);
-        this.path = path.replaceAll("\\{ + name + \\}", Utils.encode(value, "UTF-8"));
+        String path = url.getPath();
+        if (path == null) {
+            path = "/";
+        }
+        url.setPath(path.replaceAll("\\{ + name + \\}", Utils.encode(value, "UTF-8")));
+        return this;
+    }
+
+    @Override
+    public BaseHttpRequestImpl queryString(String name, String value) {
+        url.getQueries().add(name, Utils.encode(value, StandardCharsets.UTF_8.name()));
+        return this;
+    }
+
+    @Override
+    public BaseHttpRequestImpl queryString(String name, String value, boolean encoded) {
+        if (encoded) {
+            url.getQueries().add(name, value);
+        } else {
+            queryString(name, value);
+        }
         return this;
     }
 
     @Override
     public BaseHttpRequestImpl proxy(Proxy proxy) {
 
-        return null;
+        return this;
     }
 
     @Override
     public BaseHttpRequestImpl proxy(String host, int port) {
-        return null;
+        return this;
     }
 
     @Override
     public BaseHttpRequestImpl proxy(String host, int port, String username, String password) {
-        return null;
+        return this;
     }
 
     @Override
     public BaseHttpRequestImpl connectTimeout(long time, TimeUnit unit) {
-        return null;
+        int mills = Utils.checkDuration("connect timeout", time, unit);
+        if (mills > 0) {
+            connection.setConnectTimeout(mills);
+        }
+        return this;
     }
 
     @Override
     public BaseHttpRequestImpl readTimeout(long time, TimeUnit unit) {
-        return null;
+        int mills = Utils.checkDuration("read timeout", time, unit);
+        if (mills > 0) {
+            connection.setReadTimeout(mills);
+        }
+        return this;
     }
 
     @Override
     public BaseHttpRequestImpl writeTimeout(long time, TimeUnit unit) {
-        return null;
+        return this;
     }
 
     @Override
     public BaseHttpRequestImpl maxRedirectCount(int maxCount) {
-        return null;
-    }
-
-    @Override
-    public BaseHttpRequestImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
-        return null;
-    }
-
-    @Override
-    public BaseHttpRequestImpl sslSocketFactory(SSLSocketFactoryBuilder builder) {
-        return null;
+        if (maxCount < 0) {
+            maxCount = 0;
+        }
+        connection.setMaxRedirectCount(maxCount);
+        return this;
     }
 
     @Override
     public Response request() {
-        return null;
+        try {
+            build();
+            return connection.execute();
+        } catch (IOException e) {
+            throw new HttpBladeException(e);
+        }
     }
 
     @Override
     public void requestAsync(Callback callback) {
-
+        build();
+        asyncExecutor.enqueue(new Task(callback) {
+            @Override
+            public void execute() {
+                try {
+                    Response response = connection.execute();
+                    callback.success(response);
+                } catch (Exception e) {
+                    if (callback != null) {
+                        callback.error(e);
+                    }
+                }
+            }
+        });
     }
 
     @Override
     public URL getUrl() {
-        return httpUrl.toURL();
+        return url.url();
     }
 
     @Override
@@ -193,23 +219,11 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
         return method;
     }
 
-    BaseHttpConnection build(BaseHttpClientImpl client) {
+    void build() {
         if (this.method == null) {
             throw new HttpBladeException("must specify a http method");
         }
-        return new BaseHttpConnection()
-            .setUrl(httpUrl)
-            .setMethod(getMethod())
-            .setProxy(client.javaProxy)
-            .setConnectTimeout((int) client.connectTimeout())
-            .setReadTimeout((int) client.readTimeout())
-            .setHostnameVerifier(client.hostnameVerifier())
-            .setSSLSocketFactory(null)
-            .setCookieHome(client.cookieHome())
-            .setForm(form)
-            .setBody(body)
-            .setCharset(charset)
-            .setMaxRedirectCount(client.maxRedirectCount());
+        connection.setUrl(url).setMethod(getMethod()).setSSLSocketFactory(null).setForm(form).setBody(body).setCharset(charset);
     }
 
 }

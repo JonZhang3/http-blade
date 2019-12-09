@@ -43,9 +43,6 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl url(String url) {
-        if(url == null) {
-            throw new HttpBladeException("the url is null");
-        }
         String resultUrl = configUrl(url);
         this.url = HttpUrl.parse(resultUrl);
         if (this.url == null) {
@@ -117,6 +114,16 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
         }
         path = path.replaceAll("%7B" + name + "%7D", value);
         return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl queryString(String name, String value) {
+        return null;
+    }
+
+    @Override
+    public OkHttpRequestImpl queryString(String name, String value, boolean encoded) {
+        return null;
     }
 
     @Override

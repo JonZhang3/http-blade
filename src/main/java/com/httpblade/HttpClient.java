@@ -6,8 +6,8 @@ import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.SSLSocketFactoryBuilder;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -19,16 +19,20 @@ import java.util.Map;
  */
 public abstract class HttpClient {
 
-    protected String baseUrl;
-    protected long connectTimeout;
-    protected long readTimeout;
-    protected long writeTimeout;
-    protected int maxRedirectCount;
+    protected String baseUrl = "";
+    protected long connectTimeout = Defaults.CONNECT_TIMEOUT;
+    protected long readTimeout = Defaults.READ_TIMEOUT;
+    protected long writeTimeout = Defaults.WRITE_TIMEOUT;
+    protected int maxRedirectCount = Defaults.MAX_REDIRECT_COUNT;
     protected CookieHome cookieHome;
     protected HostnameVerifier hostnameVerifier;
     protected Proxy proxy;
     protected SSLSocketFactoryBuilder sslSocketFactoryBuilder;
-    protected Map<String, Headers> globalHeaders;
+    protected Map<String, Headers> globalHeaders = new HashMap<>();
+
+    protected HttpClient() {
+
+    }
 
     public HttpClient(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout, int maxRedirectCount,
                       CookieHome cookieHome, HostnameVerifier hostnameVerifier, Proxy proxy,
@@ -45,6 +49,8 @@ public abstract class HttpClient {
     }
 
     public abstract Object raw();
+
+    public abstract int clientType();
 
     public String baseUrl() {
         return baseUrl;

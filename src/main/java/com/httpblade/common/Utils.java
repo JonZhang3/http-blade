@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public final class Utils {
 
@@ -215,7 +216,7 @@ public final class Utils {
         return HTTP_DATE_FORMATER.get().format(date);
     }
 
-    public static void parseQueryString(final String queryString, final Map<String, List<String>> queries) {
+    public static void parseQueryString(final String queryString, final Queries queries) {
         if (Utils.isNotEmpty(queryString)) {
             String[] nameAndValues = queryString.split("&");
             for (String nameAndValue : nameAndValues) {
@@ -229,14 +230,23 @@ public final class Utils {
                     name = nameAndValue.substring(0, equalIndex);
                     value = nameAndValue.substring(equalIndex + 1);
                 }
-                List<String> values = queries.get(name);
-                if (values == null) {
-                    values = new LinkedList<>();
-                }
-                values.add(value);
-                queries.put(name, values);
+                queries.add(name, value);
             }
         }
+    }
+
+    public static int checkDuration(String name, long time, TimeUnit unit) {
+        if(time <= 0) {
+            return 0;
+        }
+        if(unit == null) {
+            unit = TimeUnit.MILLISECONDS;
+        }
+        long millis = unit.toMillis(time);
+        if(millis > Integer.MAX_VALUE) {
+            throw new HttpBladeException(name + " too large.");
+        }
+        return (int) millis;
     }
 
 }
