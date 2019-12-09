@@ -10,7 +10,6 @@ import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -23,9 +22,9 @@ public class OkHttpClientImpl extends HttpClient {
 
     public OkHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
                             int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
-                            Proxy proxy, SocketFactory socketFactory, Map<String, Headers> globalHeaders) {
+                            Proxy proxy, Map<String, Headers> globalHeaders) {
         super(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount, cookieHome, hostnameVerifier,
-            proxy, socketFactory, globalHeaders);
+            proxy, globalHeaders);
         OkHttpClient.Builder builder = new OkHttpClient.Builder().connectTimeout(connectTimeout,
             TimeUnit.MILLISECONDS).readTimeout(readTimeout, TimeUnit.MILLISECONDS).writeTimeout(writeTimeout,
             TimeUnit.MILLISECONDS);
@@ -47,9 +46,6 @@ public class OkHttpClientImpl extends HttpClient {
             if (proxy.hasAuth()) {
                 builder.proxyAuthenticator(createAuthenticator(proxy.getUsername(), proxy.getPassword()));
             }
-        }
-        if (socketFactory != null) {
-            builder.socketFactory(socketFactory);
         }
         this.client = builder.build();
     }

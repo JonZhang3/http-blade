@@ -1,7 +1,6 @@
 package com.httpblade.basehttp;
 
 import com.httpblade.CookieHome;
-import com.httpblade.base.HttpClient;
 import com.httpblade.HttpClientBuilder;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.GlobalProxyAuth;

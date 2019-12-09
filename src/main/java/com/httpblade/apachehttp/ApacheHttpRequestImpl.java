@@ -19,6 +19,7 @@ import com.httpblade.common.form.Form;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -40,23 +41,29 @@ import java.util.concurrent.TimeUnit;
 public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl> {
 
     private HttpMethod method;
-    private String url;
+    private URL url;
+    private String path;
     private HttpEntityRequestImpl request = new HttpEntityRequestImpl();
     private final CloseableHttpClient nowClient;
+    private RequestConfig requestConfig;
 
     public ApacheHttpRequestImpl(final HttpClient client) {
         super(client);
         nowClient = (CloseableHttpClient) client.raw();
-
         Defaults.setDefaultHeaders(request);
     }
 
     @Override
-    public ApacheHttpRequestImpl url(String url) {
+    public ApacheHttpRequestImpl url(final String url) {
         if (url == null) {
-            throw new HttpBladeException("must specify a http url");
+            throw new HttpBladeException("the url is null.");
         }
-        this.url = url;
+        String resultUrl = this.configUrl(url);
+        try {
+            this.url = new URL(resultUrl);
+        } catch (MalformedURLException e) {
+            throw new HttpBladeException(e);
+        }
         return this;
     }
 
@@ -135,16 +142,17 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public ApacheHttpRequestImpl pathVariable(String name, String value) {
-        if (url == null) {
-            throw new NullPointerException("the url is null");
+        this.path = this.url.getPath();
+        if(this.path == null) {
+            this.path = "/";
         }
-        url = url.replaceAll("\\{ + name + \\}", value);
+        path = path.replaceAll("\\{ + name + \\}", value);
         return this;
     }
 
     @Override
     public ApacheHttpRequestImpl proxy(Proxy proxy) {
-        return null;
+        return this;
     }
 
     @Override
@@ -189,11 +197,10 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
 
     @Override
     public URL getUrl() {
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            throw new HttpBladeException(e);
+        if(path != null) {
+
         }
+        return null;
     }
 
     @Override
@@ -250,7 +257,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         for (Field field : fields) {
             String name = field.name();
             String value = field.value();
-            if(field.encoded()) {
+            if (field.encoded()) {
                 name = Utils.decode(name, charset);
                 value = Utils.decode(value, charset);
             }

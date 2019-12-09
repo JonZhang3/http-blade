@@ -27,13 +27,12 @@ public abstract class HttpClient {
     protected CookieHome cookieHome;
     protected HostnameVerifier hostnameVerifier;
     protected Proxy proxy;
-    protected SocketFactory socketFactory;
     protected SSLSocketFactoryBuilder sslSocketFactoryBuilder;
     protected Map<String, Headers> globalHeaders;
 
     public HttpClient(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout, int maxRedirectCount,
                       CookieHome cookieHome, HostnameVerifier hostnameVerifier, Proxy proxy,
-                      SocketFactory socketFactory, Map<String, Headers> globalHeaders) {
+                      Map<String, Headers> globalHeaders) {
         this.baseUrl = baseUrl;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
@@ -42,7 +41,6 @@ public abstract class HttpClient {
         this.cookieHome = cookieHome;
         this.hostnameVerifier = hostnameVerifier;
         this.proxy = proxy;
-        this.socketFactory = socketFactory;
         this.globalHeaders = globalHeaders;
     }
 
@@ -79,10 +77,6 @@ public abstract class HttpClient {
 
     public HostnameVerifier hostnameVerifier() {
         return hostnameVerifier;
-    }
-
-    public SocketFactory socketFactory() {
-        return socketFactory;
     }
 
     public SSLSocketFactoryBuilder sslSocketFactoryBuilder() {

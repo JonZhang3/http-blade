@@ -43,22 +43,14 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl url(String url) {
-        String resultUrl = url;
-        if (!url.startsWith("http")) {
-            if (Utils.isEmpty(client.baseUrl())) {
-                throw new HttpBladeException("the url not an http url, and you not provide a base url.");
-            }
-            resultUrl = client.baseUrl();
-            if (url.charAt(0) != '/') {
-                resultUrl += '/';
-            }
-            resultUrl += url;
+        if(url == null) {
+            throw new HttpBladeException("the url is null");
         }
+        String resultUrl = configUrl(url);
         this.url = HttpUrl.parse(resultUrl);
         if (this.url == null) {
             throw new HttpBladeException("the url is error");
         }
-        this.path = this.url.encodedPath();
         return this;
     }
 
@@ -120,9 +112,10 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl pathVariable(String name, String value) {
-        if (path != null) {
-            path = path.replaceAll("%7B" + name + "%7D", value);
+        if (path == null) {
+            this.path = this.url.encodedPath();
         }
+        path = path.replaceAll("%7B" + name + "%7D", value);
         return this;
     }
 
@@ -247,14 +240,14 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if(callback != null) {
+                if (callback != null) {
                     callback.error(e);
                 }
             }
 
             @Override
             public void onResponse(Call call, okhttp3.Response response) throws IOException {
-                if(callback != null) {
+                if (callback != null) {
                     callback.success(new OkHttpResponseImpl(response));
                 }
             }
@@ -273,7 +266,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             throw new HttpBladeException("must specify a http method");
         }
         HttpUrl.Builder urlBuilder = this.url.newBuilder();
-        urlBuilder.encodedPath(path);
+        if (path != null) {
+            urlBuilder.encodedPath(path);
+        }
         if (HttpMethod.requiresRequestBody(method)) {
             if (body != null) {
                 builder.method(method.value(), body.createOkhttpRequestBody(header(HttpHeader.CONTENT_TYPE),

@@ -87,7 +87,6 @@ public class ApacheHttpClientBuilderImpl implements com.httpblade.HttpClientBuil
     @Override
     public ApacheHttpClientBuilderImpl hostnameVerifier(HostnameVerifier hostnameVerifier) {
         clientBuilder.setSSLHostnameVerifier(hostnameVerifier);
-        clientBuilder.setHostnameVerifier()
         this.hostnameVerifier = hostnameVerifier;
         return this;
     }

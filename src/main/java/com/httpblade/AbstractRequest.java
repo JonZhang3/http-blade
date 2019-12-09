@@ -29,6 +29,21 @@ public abstract class AbstractRequest<T extends AbstractRequest> implements Requ
         this.client = client;
     }
 
+    protected String configUrl(String url) {
+        String resultUrl = url;
+        if (!url.startsWith("http")) {
+            if (Utils.isEmpty(client.baseUrl())) {
+                throw new HttpBladeException("the url not an http url, and you not provide a base url.");
+            }
+            resultUrl = client.baseUrl();
+            if (url.charAt(0) != '/') {
+                resultUrl += '/';
+            }
+            resultUrl += url;
+        }
+        return resultUrl;
+    }
+
     @Override
     public T get(String url) {
         this.url(url);
