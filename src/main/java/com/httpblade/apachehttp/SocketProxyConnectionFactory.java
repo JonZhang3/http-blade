@@ -14,7 +14,6 @@ import java.net.Socket;
 public class SocketProxyConnectionFactory extends PlainConnectionSocketFactory {
 
     private Proxy proxy;
-    private CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
     public SocketProxyConnectionFactory(String proxyHost, int proxyPort) {
         this.proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyHost, proxyPort));
@@ -22,14 +21,12 @@ public class SocketProxyConnectionFactory extends PlainConnectionSocketFactory {
 
     @Override
     public Socket createSocket(HttpContext context) throws IOException {
-
         return new Socket(proxy);
     }
 
     @Override
     public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
                                 InetSocketAddress localAddress, HttpContext context) throws IOException {
-        InetSocketAddress unresolvedAddr = InetSocketAddress.createUnresolved(host.getHostName(), host.getPort());
-        return super.connectSocket(connectTimeout, socket, host, unresolvedAddr, localAddress, context);
+        return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
     }
 }

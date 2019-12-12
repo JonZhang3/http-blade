@@ -4,6 +4,7 @@ import com.httpblade.CookieHome;
 import com.httpblade.HttpBlade;
 import com.httpblade.HttpClient;
 import com.httpblade.common.Headers;
+import com.httpblade.common.SSLBuilder;
 import com.httpblade.common.task.AsyncTaskExecutor;
 
 import javax.net.ssl.HostnameVerifier;
@@ -18,9 +19,11 @@ public class BaseHttpClientImpl extends HttpClient {
     }
 
     public BaseHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
-                            int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
-                            com.httpblade.common.Proxy proxy, Map<String, Headers> globalHeaders) {
-        super(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount, cookieHome, hostnameVerifier, proxy, globalHeaders);
+                              int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
+                              com.httpblade.common.Proxy proxy, SSLBuilder sslBuilder,
+                              Map<String, Headers> globalHeaders) {
+        super(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount, cookieHome, hostnameVerifier,
+            proxy, sslBuilder, globalHeaders);
     }
 
     @Override

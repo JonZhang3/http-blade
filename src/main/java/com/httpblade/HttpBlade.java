@@ -4,7 +4,7 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
+import com.httpblade.common.SSLBuilder;
 
 import javax.net.ssl.HostnameVerifier;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public final class HttpBlade {
     HttpBlade(Builder builder) {
         this.client = Environment.createClient(builder.clientType, builder.baseUrl, builder.connectTimeout,
             builder.readTimeout, builder.writeTimeout, builder.maxRedirectCount, builder.cookieHome,
-            builder.hostnameVerifier, builder.proxy, builder.globalHeaders);
+            builder.hostnameVerifier, builder.proxy, builder.sslBuilder, builder.globalHeaders);
     }
 
     public static void setJsonParserFactory(JsonParserFactory parserFactory) {
@@ -117,7 +117,7 @@ public final class HttpBlade {
         private Proxy proxy;
         private HostnameVerifier hostnameVerifier;
         private CookieHome cookieHome;
-        private SSLSocketFactoryBuilder sslSocketFactoryBuilder;
+        private SSLBuilder sslBuilder;
         private Map<String, Headers> globalHeaders = new LinkedHashMap<>();
 
         public Builder() {
@@ -142,6 +142,7 @@ public final class HttpBlade {
             this.proxy = client.proxy;
             this.hostnameVerifier = client.hostnameVerifier;
             this.cookieHome = client.cookieHome;
+            this.sslBuilder = client.sslBuilder;
             this.globalHeaders = new HashMap<>();
             this.globalHeaders.putAll(client.globalHeaders);
         }
@@ -204,8 +205,8 @@ public final class HttpBlade {
             return this;
         }
 
-        public Builder sslSocketFactory(SSLSocketFactoryBuilder builder) {
-            this.sslSocketFactoryBuilder = builder;
+        public Builder sslSocketFactory(SSLBuilder builder) {
+            this.sslBuilder = builder;
             return this;
         }
 

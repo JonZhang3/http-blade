@@ -6,6 +6,7 @@ import com.httpblade.basehttp.BaseHttpClientImpl;
 import com.httpblade.basehttp.BaseHttpRequestImpl;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLBuilder;
 import com.httpblade.okhttp.OkHttpClientImpl;
 import com.httpblade.okhttp.OkHttpRequestImpl;
 
@@ -60,18 +61,19 @@ final class Environment {
 
     static HttpClient createClient(int clientType, String baseUrl, long connectTimeout, long readTimeout,
                                    long writeTimeout, int maxRedirectCount, CookieHome cookieHome,
-                                   HostnameVerifier hostnameVerifier, Proxy proxy, Map<String, Headers> globalHeaders) {
+                                   HostnameVerifier hostnameVerifier, Proxy proxy,
+                                   SSLBuilder sslBuilder, Map<String, Headers> globalHeaders) {
         if (clientType == CLIENT_TYPE_DEFAULT) {
             return createDefaultClient();
         } else if (clientType == CLIENT_TYPE_JDK) {
             return new BaseHttpClientImpl(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount,
-                cookieHome, hostnameVerifier, proxy, globalHeaders);
+                cookieHome, hostnameVerifier, proxy, sslBuilder, globalHeaders);
         } else if (clientType == CLIENT_TYPE_OKHTTP) {
             return new OkHttpClientImpl(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount,
-                cookieHome, hostnameVerifier, proxy, globalHeaders);
+                cookieHome, hostnameVerifier, proxy, sslBuilder, globalHeaders);
         } else if (clientType == CLIENT_TYPE_APACHE_HTTP) {
             return new ApacheHttpClientImpl(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount,
-                cookieHome, hostnameVerifier, proxy, globalHeaders);
+                cookieHome, hostnameVerifier, proxy, sslBuilder, globalHeaders);
         } else {
             throw new HttpBladeException("the client type not supported.");
         }

@@ -1,7 +1,7 @@
 package com.httpblade;
 
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
+import com.httpblade.common.SSLBuilder;
 
 import javax.net.ssl.HostnameVerifier;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +80,7 @@ public interface HttpClientBuilder<T extends HttpClientBuilder> {
      *
      * @return {@code this}
      */
-    T sslSocketFactory(SSLSocketFactoryBuilder builder);
+    T sslSocketFactory(SSLBuilder builder);
 
     /**
      * 设置默认的请求头，这将会添加在每次请求中

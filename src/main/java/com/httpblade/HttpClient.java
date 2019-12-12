@@ -4,7 +4,7 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
+import com.httpblade.common.SSLBuilder;
 
 import javax.net.ssl.HostnameVerifier;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public abstract class HttpClient {
     protected CookieHome cookieHome;
     protected HostnameVerifier hostnameVerifier;
     protected Proxy proxy;
-    protected SSLSocketFactoryBuilder sslSocketFactoryBuilder;
+    protected SSLBuilder sslBuilder;
     protected Map<String, Headers> globalHeaders = new HashMap<>();
 
     protected HttpClient() {
@@ -36,7 +36,7 @@ public abstract class HttpClient {
 
     public HttpClient(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout, int maxRedirectCount,
                       CookieHome cookieHome, HostnameVerifier hostnameVerifier, Proxy proxy,
-                      Map<String, Headers> globalHeaders) {
+                      SSLBuilder sslBuilder, Map<String, Headers> globalHeaders) {
         this.baseUrl = baseUrl;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
@@ -45,6 +45,7 @@ public abstract class HttpClient {
         this.cookieHome = cookieHome;
         this.hostnameVerifier = hostnameVerifier;
         this.proxy = proxy;
+        this.sslBuilder = sslBuilder;
         this.globalHeaders = globalHeaders;
     }
 
@@ -85,8 +86,8 @@ public abstract class HttpClient {
         return hostnameVerifier;
     }
 
-    public SSLSocketFactoryBuilder sslSocketFactoryBuilder() {
-        return sslSocketFactoryBuilder;
+    public SSLBuilder sslSocketFactory() {
+        return sslBuilder;
     }
 
     public Proxy proxy() {

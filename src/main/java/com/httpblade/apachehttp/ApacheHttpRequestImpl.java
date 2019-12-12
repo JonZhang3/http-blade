@@ -25,6 +25,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -300,6 +301,9 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         }
         request.setURI(uri);
         addCookie(request, client.cookieHome());
+        if(requestConfigBuilder != null) {
+            request.setConfig(requestConfigBuilder.build());
+        }
     }
 
     private static void addParameter(URIBuilder uriBuilder, Form form, String charset) {

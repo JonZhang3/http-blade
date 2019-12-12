@@ -7,12 +7,14 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLBuilder;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -25,14 +27,14 @@ public class OkHttpClientImpl extends HttpClient {
 
     public OkHttpClientImpl() {
         this("", Defaults.CONNECT_TIMEOUT, Defaults.READ_TIMEOUT, Defaults.WRITE_TIMEOUT, Defaults.MAX_REDIRECT_COUNT
-            , null, null, null, new HashMap<>());
+            , null, null, null, null, new HashMap<>());
     }
 
     public OkHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
                             int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
-                            Proxy proxy, Map<String, Headers> globalHeaders) {
+                            Proxy proxy, SSLBuilder sslBuilder, Map<String, Headers> globalHeaders) {
         super(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount, cookieHome, hostnameVerifier,
-            proxy, globalHeaders);
+            proxy, sslBuilder, globalHeaders);
         OkHttpClient.Builder builder = new OkHttpClient.Builder().connectTimeout(connectTimeout,
             TimeUnit.MILLISECONDS).readTimeout(readTimeout, TimeUnit.MILLISECONDS).writeTimeout(writeTimeout,
             TimeUnit.MILLISECONDS);
@@ -54,6 +56,10 @@ public class OkHttpClientImpl extends HttpClient {
             if (proxy.hasAuth()) {
                 builder.proxyAuthenticator(createAuthenticator(proxy.getUsername(), proxy.getPassword()));
             }
+        }
+        if(sslBuilder != null) {
+            SSLContext context = sslBuilder.build();
+            builder.sslSocketFactory(context.getSocketFactory(), sslBuilder.getTrustManager());
         }
         this.client = builder.build();
     }

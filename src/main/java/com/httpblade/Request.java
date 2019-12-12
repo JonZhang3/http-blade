@@ -2,10 +2,7 @@ package com.httpblade;
 
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
-import com.httpblade.common.SSLSocketFactoryBuilder;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.HostnameVerifier;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;

@@ -6,6 +6,7 @@ import com.httpblade.HttpClient;
 import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.Proxy;
+import com.httpblade.common.SSLBuilder;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -21,6 +22,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,18 +31,21 @@ public class ApacheHttpClientImpl extends HttpClient {
     private final CloseableHttpClient client;
 
     ApacheHttpClientImpl() {
-        this("", Defaults.CONNECT_TIMEOUT, Defaults.READ_TIMEOUT, Defaults.WRITE_TIMEOUT, Defaults.MAX_REDIRECT_COUNT
-            , null, null, null, new HashMap<>());
+        this("", Defaults.CONNECT_TIMEOUT, Defaults.READ_TIMEOUT, Defaults.WRITE_TIMEOUT,
+            Defaults.MAX_REDIRECT_COUNT, null, null, null, null, new HashMap<>());
     }
 
     public ApacheHttpClientImpl(String baseUrl, long connectTimeout, long readTimeout, long writeTimeout,
                                 int maxRedirectCount, CookieHome cookieHome, HostnameVerifier hostnameVerifier,
-                                Proxy proxy, Map<String, Headers> globalHeaders) {
+                                Proxy proxy, SSLBuilder sslBuilder, Map<String, Headers> globalHeaders) {
         super(baseUrl, connectTimeout, readTimeout, writeTimeout, maxRedirectCount, cookieHome, hostnameVerifier,
-            proxy, globalHeaders);
+            proxy, sslBuilder, globalHeaders);
         HttpClientBuilder clientBuilder = HttpClients.custom();
         clientBuilder.disableCookieManagement();
         clientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+        if(sslBuilder != null) {
+            clientBuilder.setSSLContext(sslBuilder.build());
+        }
         if (proxy != null) {
             if (proxy.getType() == java.net.Proxy.Type.HTTP) {
                 clientBuilder.setProxy(new HttpHost(proxy.getHost(), proxy.getPort()));
@@ -51,15 +56,19 @@ public class ApacheHttpClientImpl extends HttpClient {
                     clientBuilder.setDefaultCredentialsProvider(cp);
                 }
             } else if (proxy.getType() == java.net.Proxy.Type.SOCKS) {
+                SSLContext sslContext = null;
+                if(sslBuilder != null) {
+                    sslContext = sslBuilder.build();
+                }
                 Registry<ConnectionSocketFactory> registry =
-                    RegistryBuilder.<ConnectionSocketFactory>create().register("http",
-                        new SocketProxyConnectionFactory(proxy.getHost(), proxy.getPort())).register("https",
-                        new SocketProxySSLConnectionFactory(null, hostnameVerifier, proxy.getHost(), proxy.getPort())).build();
+                    RegistryBuilder.<ConnectionSocketFactory>create()
+                        .register("http", new SocketProxyConnectionFactory(proxy.getHost(), proxy.getPort()))
+                        .register("https", new SocketProxySSLConnectionFactory(sslContext, hostnameVerifier, proxy.getHost(), proxy.getPort()))
+                        .build();
                 PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(registry);
                 clientBuilder.setConnectionManager(connManager);
             }
         }
-        // TODO SSLSocketFactory
         RequestConfig.Builder configBuilder = RequestConfig.custom();
         configBuilder.setConnectTimeout((int) connectTimeout).setSocketTimeout((int) readTimeout).setCircularRedirectsAllowed(false).setRelativeRedirectsAllowed(false);
         if (maxRedirectCount > 0) {
@@ -67,7 +76,6 @@ public class ApacheHttpClientImpl extends HttpClient {
         } else {
             configBuilder.setRedirectsEnabled(false);
         }
-
         clientBuilder.setDefaultRequestConfig(configBuilder.build());
         this.client = clientBuilder.build();
     }

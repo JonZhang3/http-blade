@@ -31,7 +31,11 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     public BaseHttpRequestImpl(HttpClient client) {
         super(client);
-        connection.setHostnameVerifier(client.hostnameVerifier()).setConnectTimeout((int) client.connectTimeout()).setReadTimeout((int) client.readTimeout()).setCookieHome(client.cookieHome()).setMaxRedirectCount(client.maxRedirectCount());
+        connection.setHostnameVerifier(client.hostnameVerifier())
+            .setConnectTimeout((int) client.connectTimeout())
+            .setReadTimeout((int) client.readTimeout())
+            .setCookieHome(client.cookieHome())
+            .setMaxRedirectCount(client.maxRedirectCount());
     }
 
     @Override
@@ -223,7 +227,10 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
         if (this.method == null) {
             throw new HttpBladeException("must specify a http method");
         }
-        connection.setUrl(url).setMethod(getMethod()).setSSLSocketFactory(null).setForm(form).setBody(body).setCharset(charset);
+        connection.setUrl(url).setMethod(getMethod()).setForm(form).setBody(body).setCharset(charset);
+        if (client.sslSocketFactory() != null) {
+            connection.setSSLSocketFactory(client.sslSocketFactory().build().getSocketFactory());
+        }
     }
 
 }
