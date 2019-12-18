@@ -22,7 +22,7 @@ public final class Proxy {
         this(java.net.Proxy.Type.HTTP, host, port, username, password);
     }
 
-    public Proxy(java.net.Proxy.Type type, String host, int port, String username, String password) {
+    private Proxy(java.net.Proxy.Type type, String host, int port, String username, String password) {
         this.type = type;
         this.host = host;
         this.port = port;
@@ -58,6 +58,15 @@ public final class Proxy {
         try {
             InetAddress inetAddress = InetAddress.getByName(proxy.getHost());
             return new java.net.Proxy(proxy.getType(), new InetSocketAddress(inetAddress, proxy.getPort()));
+        } catch (UnknownHostException e) {
+            throw new HttpBladeException(e);
+        }
+    }
+
+    public static java.net.Proxy newJavaProxy(String host, int port) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(host);
+            return new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(inetAddress, port));
         } catch (UnknownHostException e) {
             throw new HttpBladeException(e);
         }

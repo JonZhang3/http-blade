@@ -185,11 +185,6 @@ public final class HttpBlade {
             return this;
         }
 
-        public Builder proxy(Proxy proxy) {
-            this.proxy = proxy;
-            return this;
-        }
-
         public Builder proxy(String host, int port) {
             this.proxy = new Proxy(host, port);
             return this;

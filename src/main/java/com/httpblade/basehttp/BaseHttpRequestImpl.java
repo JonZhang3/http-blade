@@ -5,6 +5,7 @@ import com.httpblade.HttpBladeException;
 import com.httpblade.AbstractRequest;
 import com.httpblade.HttpClient;
 import com.httpblade.Response;
+import com.httpblade.common.Defaults;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
@@ -31,11 +32,17 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
     public BaseHttpRequestImpl(HttpClient client) {
         super(client);
+        Defaults.setDefaultHeaders(headers);
         connection.setHostnameVerifier(client.hostnameVerifier())
             .setConnectTimeout((int) client.connectTimeout())
             .setReadTimeout((int) client.readTimeout())
             .setCookieHome(client.cookieHome())
-            .setMaxRedirectCount(client.maxRedirectCount());
+            .setMaxRedirectCount(client.maxRedirectCount())
+            .setProxy(Proxy.toJavaProxy(client.proxy()));
+        if (client.proxy().hasAuth()) {
+            setHeader(HttpHeader.PROXY_AUTHORIZATION,
+                Utils.basicAuthString(client.proxy().getUsername(), client.proxy().getPassword()));
+        }
     }
 
     @Override
@@ -138,18 +145,31 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     }
 
     @Override
-    public BaseHttpRequestImpl proxy(Proxy proxy) {
-
+    public BaseHttpRequestImpl noProxy() {
+        connection.setProxy(null);
+        removeHeader(HttpHeader.PROXY_AUTHORIZATION);
         return this;
     }
 
     @Override
     public BaseHttpRequestImpl proxy(String host, int port) {
+        if (Utils.isNotEmpty(host)) {
+            connection.setProxy(Proxy.newJavaProxy(host, port));
+            removeHeader(HttpHeader.PROXY_AUTHORIZATION);
+        }
         return this;
     }
 
     @Override
     public BaseHttpRequestImpl proxy(String host, int port, String username, String password) {
+        if (Utils.isNotEmpty(host)) {
+            connection.setProxy(Proxy.newJavaProxy(host, port));
+            removeHeader(HttpHeader.PROXY_AUTHORIZATION);
+        }
+        if (username != null && password != null) {
+            setHeader(HttpHeader.PROXY_AUTHORIZATION,
+                Utils.basicAuthString(client.proxy().getUsername(), client.proxy().getPassword()));
+        }
         return this;
     }
 
@@ -223,7 +243,7 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
         return method;
     }
 
-    void build() {
+    private void build() {
         if (this.method == null) {
             throw new HttpBladeException("must specify a http method");
         }

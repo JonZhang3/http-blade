@@ -35,7 +35,6 @@ class BaseHttpConnection {
     private int maxRedirectCount;
     private Headers headers = new Headers();
     private HostnameVerifier hostnameVerifier;
-    private SocketFactory socketFactory;
     private SSLSocketFactory ssf;
     private CookieHome cookieHome;
     private Form form;

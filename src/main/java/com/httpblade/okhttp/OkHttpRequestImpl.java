@@ -127,19 +127,11 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     }
 
     @Override
-    public OkHttpRequestImpl proxy(Proxy proxy) {
+    public OkHttpRequestImpl noProxy() {
         if (customClientBuilder == null) {
             customClientBuilder = nowClient.newBuilder();
         }
-        if (proxy != null) {
-            customClientBuilder.proxy(Proxy.toJavaProxy(proxy));
-            if (proxy.hasAuth()) {
-                customClientBuilder.proxyAuthenticator(OkHttpClientImpl.createAuthenticator(proxy.getUsername(),
-                    proxy.getPassword()));
-            }
-        } else {
-            customClientBuilder.proxy(null);
-        }
+        customClientBuilder.proxy(null);
         return this;
     }
 
@@ -150,8 +142,6 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
         }
         if (Utils.isNotEmpty(host)) {
             customClientBuilder.proxy(Proxy.toJavaProxy(new Proxy(host, port)));
-        } else {
-            customClientBuilder.proxy(null);
         }
         return this;
     }
@@ -162,13 +152,10 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
             customClientBuilder = nowClient.newBuilder();
         }
         if (Utils.isNotEmpty(host)) {
-            Proxy proxy = new Proxy(host, port, username, password);
-            customClientBuilder.proxy(Proxy.toJavaProxy(proxy));
-            if (proxy.hasAuth()) {
+            customClientBuilder.proxy(Proxy.newJavaProxy(host, port));
+            if (username != null && password != null) {
                 customClientBuilder.proxyAuthenticator(OkHttpClientImpl.createAuthenticator(username, password));
             }
-        } else {
-            customClientBuilder.proxy(null);
         }
         return this;
     }

@@ -1,7 +1,5 @@
 package com.httpblade.common;
 
-import org.apache.http.client.methods.HttpRequestBase;
-
 public interface Defaults {
 
     /**
@@ -37,7 +35,7 @@ public interface Defaults {
         headers.set(HttpHeader.ACCEPT_ENCODING, "gzip,deflate");
     }
 
-    static void setDefaultHeaders(HttpRequestBase request) {
+    static void setDefaultHeaders(org.apache.http.client.methods.HttpRequestBase request) {
         request.setHeader(HttpHeader.USER_AGENT, USER_AGENT_STRING);
         request.setHeader(HttpHeader.ACCEPT, "*/*");
         request.setHeader(HttpHeader.ACCEPT_ENCODING, "gzip,deflate");

@@ -11,7 +11,6 @@ import com.httpblade.common.Defaults;
 import com.httpblade.common.Headers;
 import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
-import com.httpblade.common.Proxy;
 import com.httpblade.common.Utils;
 import com.httpblade.common.form.Field;
 import com.httpblade.common.form.Form;
@@ -22,10 +21,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -162,16 +159,11 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     }
 
     @Override
-    public ApacheHttpRequestImpl proxy(Proxy proxy) {
+    public ApacheHttpRequestImpl noProxy() {
         if (requestConfigBuilder == null) {
             requestConfigBuilder = RequestConfig.custom();
         }
-        if (proxy != null) {
-            requestConfigBuilder.setProxy(new HttpHost(proxy.getHost(), proxy.getPort()));
-            if (proxy.hasAuth()) {
-
-            }
-        }
+        requestConfigBuilder.setProxy(null);
         return this;
     }
 
@@ -191,10 +183,11 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         if (requestConfigBuilder == null) {
             requestConfigBuilder = RequestConfig.custom();
         }
-        Proxy proxy = new Proxy(host, port, username, password);
-        requestConfigBuilder.setProxy(new HttpHost(host, port));
-        if (proxy.hasAuth()) {
-
+        if (Utils.isNotEmpty(host)) {
+            requestConfigBuilder.setProxy(new HttpHost(host, port));
+            if (username != null && password != null) {
+                ((ApacheHttpClientImpl) client).setCredentials(host, port, username, password);
+            }
         }
         return this;
     }
@@ -301,7 +294,7 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
         }
         request.setURI(uri);
         addCookie(request, client.cookieHome());
-        if(requestConfigBuilder != null) {
+        if (requestConfigBuilder != null) {
             request.setConfig(requestConfigBuilder.build());
         }
     }

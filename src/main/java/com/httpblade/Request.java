@@ -1,7 +1,6 @@
 package com.httpblade;
 
 import com.httpblade.common.HttpMethod;
-import com.httpblade.common.Proxy;
 
 import java.io.File;
 import java.io.InputStream;
@@ -113,7 +112,7 @@ public interface Request<T extends Request> {
 
     T basicAuth(String username, String password);
 
-    T proxy(Proxy proxy);
+    T noProxy();
 
     T proxy(String host, int port);
 

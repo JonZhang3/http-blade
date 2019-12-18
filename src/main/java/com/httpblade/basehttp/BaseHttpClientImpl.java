@@ -5,14 +5,11 @@ import com.httpblade.HttpBlade;
 import com.httpblade.HttpClient;
 import com.httpblade.common.Headers;
 import com.httpblade.common.SSLBuilder;
-import com.httpblade.common.task.AsyncTaskExecutor;
 
 import javax.net.ssl.HostnameVerifier;
 import java.util.Map;
 
 public class BaseHttpClientImpl extends HttpClient {
-
-    private AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
 
     BaseHttpClientImpl() {
         super();
