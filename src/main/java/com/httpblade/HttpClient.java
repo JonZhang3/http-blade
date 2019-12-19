@@ -10,13 +10,6 @@ import javax.net.ssl.HostnameVerifier;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Http 客户端。首先构建 {@code Request}，使用
- * {@code HttpClient} 去调用，同步方式或异步方式
- *
- * @author Jon
- * @since 1.0.0
- */
 public abstract class HttpClient {
 
     protected String baseUrl = "";

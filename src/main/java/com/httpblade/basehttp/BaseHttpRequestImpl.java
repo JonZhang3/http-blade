@@ -10,8 +10,7 @@ import com.httpblade.common.HttpHeader;
 import com.httpblade.common.HttpMethod;
 import com.httpblade.common.Proxy;
 import com.httpblade.common.Utils;
-import com.httpblade.common.task.AsyncTaskExecutor;
-import com.httpblade.common.task.Task;
+import com.httpblade.common.AsyncTasks;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
 
-    private static AsyncTaskExecutor asyncExecutor = new AsyncTaskExecutor();
+    private static AsyncTasks tasksExecutor = new AsyncTasks();
 
     private HttpMethod method;
     private HttpUrl url;
@@ -216,17 +215,19 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     }
 
     @Override
-    public void requestAsync(Callback callback) {
+    public void requestAsync(final Callback callback) {
         build();
-        asyncExecutor.enqueue(new Task(callback) {
+        tasksExecutor.execute(new AsyncTasks.Task(callback) {
             @Override
-            public void execute() {
+            protected void execute() {
                 try {
                     Response response = connection.execute();
-                    callback.success(response);
+                    if(this.callback != null) {
+                        this.callback.success(response);
+                    }
                 } catch (Exception e) {
-                    if (callback != null) {
-                        callback.error(e);
+                    if(this.callback != null) {
+                        this.callback.error(e);
                     }
                 }
             }

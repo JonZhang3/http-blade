@@ -24,7 +24,8 @@ public class DefaultCookieHome implements CookieHome {
 
     @Override
     public List<Cookie> load(URL url) {
-        return null;
+        String host = url.getHost();
+        return cookies.get(host);
     }
 
 }
