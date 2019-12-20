@@ -82,9 +82,13 @@ public interface Request<T extends Request> {
 
     T pathVariable(String name, String value);
 
-    T queryString(String name, String value);
+    T setQuery(String name, String value);
 
-    T queryString(String name, String value, boolean encoded);
+    T addQuery(String name, String value);
+
+    T setEncodedQuery(String encodedName, String encodedValue);
+
+    T addEncodedQuery(String encodedName, String encodedValue);
 
     T form(Map<String, String> values);
 

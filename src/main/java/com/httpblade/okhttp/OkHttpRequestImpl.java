@@ -30,6 +30,7 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     private Request.Builder builder = new Request.Builder();
     private HttpUrl url;
+    private HttpUrl.Builder urlBuilder;
     private String path;
     private HttpMethod method;
     private OkHttpClient.Builder customClientBuilder;
@@ -109,6 +110,9 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     @Override
     public OkHttpRequestImpl pathVariable(String name, String value) {
+        if(this.url == null) {
+            throw new HttpBladeException("You must first specify Http URL.");
+        }
         if (path == null) {
             this.path = this.url.encodedPath();
         }
@@ -117,13 +121,31 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
     }
 
     @Override
-    public OkHttpRequestImpl queryString(String name, String value) {
-        return null;
+    public OkHttpRequestImpl setQuery(String name, String value) {
+        if(this.url == null) {
+            throw new HttpBladeException("You must first specify Http URL.");
+        }
+
+        return this;
     }
 
     @Override
-    public OkHttpRequestImpl queryString(String name, String value, boolean encoded) {
-        return null;
+    public OkHttpRequestImpl addQuery(String name, String value) {
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl setEncodedQuery(String encodedName, String encodedValue) {
+        if(this.url == null) {
+            throw new HttpBladeException("You must first specify Http URL.");
+        }
+
+        return this;
+    }
+
+    @Override
+    public OkHttpRequestImpl addEncodedQuery(String encodedName, String encodedValue) {
+        return this;
     }
 
     @Override
@@ -257,12 +279,13 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
 
     private Request build() {
         if (method == null) {
-            throw new HttpBladeException("must specify a http method");
+            throw new HttpBladeException("You must specify a http method");
         }
         HttpUrl.Builder urlBuilder = this.url.newBuilder();
         if (path != null) {
             urlBuilder.encodedPath(path);
         }
+        // 如果请求方法允许有请求体
         if (HttpMethod.requiresRequestBody(method)) {
             if (body != null) {
                 builder.method(method.value(), body.createOkhttpRequestBody(header(HttpHeader.CONTENT_TYPE),
@@ -304,6 +327,10 @@ public class OkHttpRequestImpl extends AbstractRequest<OkHttpRequestImpl> {
         }
         this.headers.forEach(action);
         return headerBuilder.build();
+    }
+
+    public static void main(String[] args) {
+        HttpUrl url = HttpUrl.parse("http://www.baidu.com?a=张建东");
     }
 
 }

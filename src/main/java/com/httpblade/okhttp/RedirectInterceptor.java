@@ -16,7 +16,7 @@ import okhttp3.internal.http.RealInterceptorChain;
 
 import java.io.IOException;
 
-public class RedirectInterceptor implements Interceptor {
+class RedirectInterceptor implements Interceptor {
 
     private int maxRedirectCount = 0;
 

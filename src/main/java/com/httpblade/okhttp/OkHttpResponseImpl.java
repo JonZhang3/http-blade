@@ -25,7 +25,6 @@ public class OkHttpResponseImpl implements com.httpblade.Response {
 
     OkHttpResponseImpl(Response response) {
         this.response = response;
-        response.headers().getDate("");
     }
 
     @Override

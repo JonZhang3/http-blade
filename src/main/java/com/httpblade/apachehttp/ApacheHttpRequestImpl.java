@@ -147,13 +147,13 @@ public class ApacheHttpRequestImpl extends AbstractRequest<ApacheHttpRequestImpl
     }
 
     @Override
-    public ApacheHttpRequestImpl queryString(String name, String value) {
+    public ApacheHttpRequestImpl setQuery(String name, String value) {
         uriBuilder.addParameter(name, value);
         return this;
     }
 
     @Override
-    public ApacheHttpRequestImpl queryString(String name, String value, boolean encoded) {
+    public ApacheHttpRequestImpl query(String name, String value, boolean encoded) {
         uriBuilder.addParameter(name, value);
         return this;
     }

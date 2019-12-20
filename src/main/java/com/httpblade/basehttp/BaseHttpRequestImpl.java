@@ -128,17 +128,17 @@ public class BaseHttpRequestImpl extends AbstractRequest<BaseHttpRequestImpl> {
     }
 
     @Override
-    public BaseHttpRequestImpl queryString(String name, String value) {
+    public BaseHttpRequestImpl setQuery(String name, String value) {
         url.getQueries().add(name, Utils.encode(value, StandardCharsets.UTF_8.name()));
         return this;
     }
 
     @Override
-    public BaseHttpRequestImpl queryString(String name, String value, boolean encoded) {
+    public BaseHttpRequestImpl query(String name, String value, boolean encoded) {
         if (encoded) {
             url.getQueries().add(name, value);
         } else {
-            queryString(name, value);
+            setQuery(name, value);
         }
         return this;
     }
